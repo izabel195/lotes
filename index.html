@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cadastro de Bobinas</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #1a73e8;
+      box-shadow: 0 0 5px rgba(26, 115, 232, 0.4);
+    }
+    button {
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover { background-color: #1669c1; }
+    button.logout { background-color: #c0392b; }
+    button.logout:hover { background-color: #a93226; }
+    .remove-bobina-btn, .remove-produto-btn {
+      background-color: #e74c3c;
+      color: white;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      margin-top: 5px;
+      font-size: 14px;
+    }
+    .remove-bobina-btn:hover, .remove-produto-btn:hover {
+      background-color: #c0392b;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    th { background-color: #f1f1f1; }
+    .produto-group {
+      border: 2px solid #1a73e8;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+      background-color: #ffffff;
+    }
+    .bobina-group {
+      border: 1px dashed #999;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      background-color: #fefefe;
+    }
+    .hidden { display: none; }
+    h2 { color: #1a73e8; }
+    label { font-weight: bold; margin-top: 10px; display: block; }
+  </style>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div id="login-area">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="senha" placeholder="Senha" />
+    <label><input type="checkbox" id="mostrarSenha" onchange="toggleSenha()" /> Mostrar senha</label>
+    <button onclick="login()">Entrar</button>
+    <button onclick="registrar()">Registrar</button>
+  </div>
+
+  <div id="app-area" class="hidden">
+    <button class="logout" onclick="logout()">Sair</button>
+
+    <input type="text" id="cliente" placeholder="Cliente" />
+    <div id="produtos-container"></div>
+    <button onclick="adicionarProduto()">+ Adicionar Produto</button>
+    <button onclick="salvarRegistros()">Salvar</button>
+
+    <label>Filtrar por Cliente:</label>
+    <select id="filtroCliente" onchange="filtrarTabela()">
+      <option value="">Todos</option>
+    </select>
+
+    <label>Filtrar por Número da Venda:</label>
+    <select id="filtroVenda" onchange="filtrarTabela()">
+      <option value="">Todos</option>
+    </select>
+
+    <button onclick="imprimirClienteSelecionado()">Imprimir Seleção</button>
+
+    <table id="tabelaRegistros">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Número da OS</th>
+          <th>Produto</th>
+          <th>Matéria-Prima / Lote</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCse9Zq2XdjUwN91pzNxF5pItSVR9b2fJ8",
+    authDomain: "lote-de-pido.firebaseapp.com",
+    projectId: "lote-de-pido",
+    storageBucket: "lote-de-pido.appspot.com",
+    messagingSenderId: "273534472187",
+    appId: "1:273534472187:web:b35eca45015f3c27fe055e"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const produtosContainer = document.getElementById("produtos-container");
+  let registros = [];
+
+  // Login
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      document.getElementById("login-area").classList.add("hidden");
+      document.getElementById("app-area").classList.remove("hidden");
+      carregarRegistrosEmTempoReal();
+    } else {
+      document.getElementById("login-area").classList.remove("hidden");
+      document.getElementById("app-area").classList.add("hidden");
+      registros = [];
+      atualizarTabela();
+      atualizarFiltro();
+    }
+  });
+
+  function toggleSenha() {
+    const senhaInput = document.getElementById("senha");
+    senhaInput.type = senhaInput.type === "password" ? "text" : "password";
+  }
+
+  function login() {
+    const email = document.getElementById("email").value;
+    const senha = document.getElementById("senha").value;
+    auth.signInWithEmailAndPassword(email, senha)
+      .catch(e => alert("Erro ao entrar: " + e.message));
+  }
+
+  function registrar() {
+    const email = document.getElementById("email").value;
+    const senha = document.getElementById("senha").value;
+    auth.createUserWithEmailAndPassword(email, senha)
+      .then(() => alert("Conta criada com sucesso!"))
+      .catch(e => alert("Erro ao registrar: " + e.message));
+  }
+
+  function logout() {
+    auth.signOut();
+  }
+
+  function adicionarProduto() {
+    const divProduto = document.createElement("div");
+    divProduto.classList.add("produto-group");
+    divProduto.innerHTML = `
+      <input type="text" class="numeroVenda" placeholder="Número da Venda / Nota Fiscal" />
+      <input type="text" class="produto" placeholder="Produto" />
+      <div class="bobinas-container"></div>
+      <button type="button" onclick="adicionarBobina(this)">+ Adicionar Bobina</button>
+      <button type="button" onclick="removerProduto(this)" class="remove-produto-btn">Remover Produto</button>
+    `;
+    produtosContainer.appendChild(divProduto);
+    adicionarBobina(divProduto.querySelector(".bobinas-container"));
+  }
+
+  function removerProduto(btn) { btn.closest(".produto-group").remove(); }
+
+  function adicionarBobina(btnOrContainer) {
+    let container;
+    if (btnOrContainer.classList.contains("bobinas-container")) {
+      container = btnOrContainer;
+    } else {
+      container = btnOrContainer.previousElementSibling;
+    }
+    const div = document.createElement("div");
+    div.classList.add("bobina-group");
+    div.innerHTML = `
+      <select>
+        <option value="">Selecione a Bobina</option>
+        <option value="FSC">FSC</option>
+        <option value="SUZANO">SUZANO</option>
+        <option value="KLABIN">KLABIN</option>
+      </select>
+      <input type="text" placeholder="Lote da Bobina" />
+      <button type="button" class="remove-bobina-btn" onclick="removerBobina(this)">Remover</button>
+    `;
+    container.appendChild(div);
+  }
+
+  function removerBobina(btn) { btn.parentElement.remove(); }
+
+  async function salvarRegistros() {
+    const cliente = document.getElementById("cliente").value.trim();
+    const user = auth.currentUser;
+    if (!cliente || !user) {
+      alert("Preencha o cliente e esteja logado.");
+      return;
+    }
+
+    const gruposProdutos = document.querySelectorAll(".produto-group");
+    const promessas = [];
+
+    gruposProdutos.forEach(grupo => {
+      const numeroVenda = grupo.querySelector(".numeroVenda").value.trim();
+      const produto = grupo.querySelector(".produto").value.trim();
+      const bobinas = [];
+      grupo.querySelectorAll(".bobina-group").forEach(group => {
+        const tipo = group.querySelector("select").value.trim();
+        const lote = group.querySelector("input").value.trim();
+        if (tipo && lote) bobinas.push({ tipo, lote });
+      });
+
+      if (numeroVenda && produto && bobinas.length > 0) {
+        const registro = {
+          cliente,
+          numeroVenda,
+          produto,
+          bobinas,
+          criadoPor: user.email,
+          data: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        promessas.push(db.collection("bobinas").add(registro));
+      }
+    });
+
+    if (promessas.length === 0) {
+      alert("Preencha pelo menos um produto com suas bobinas corretamente.");
+      return;
+    }
+
+    try {
+      await Promise.all(promessas);
+      produtosContainer.innerHTML = "";
+      adicionarProduto();
+      alert("Registros salvos com sucesso!");
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+      alert("Erro ao salvar: " + error.message);
+    }
+  }
+
+  function carregarRegistrosEmTempoReal() {
+    db.collection("bobinas").orderBy("data", "desc")
+      .onSnapshot(snapshot => {
+        registros = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        atualizarTabela();
+        atualizarFiltro();
+      });
+  }
+
+  function atualizarTabela() {
+    const tbody = document.querySelector("#tabelaRegistros tbody");
+    tbody.innerHTML = "";
+
+    registros.forEach(reg => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${reg.cliente}</td>
+        <td>${reg.numeroVenda}</td>
+        <td>${reg.produto}</td>
+        <td>${reg.bobinas.map(b => `${b.tipo} - ${b.lote}`).join("<br>")}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function atualizarFiltro() {
+    const filtroCliente = document.getElementById("filtroCliente");
+    const filtroVenda = document.getElementById("filtroVenda");
+
+    const clientes = [...new Set(registros.map(r => r.cliente))];
+    const vendas = [...new Set(registros.map(r => r.numeroVenda))];
+
+    filtroCliente.innerHTML = `<option value="">Todos</option>` + clientes.map(c => `<option>${c}</option>`).join("");
+    filtroVenda.innerHTML = `<option value="">Todos</option>` + vendas.map(v => `<option>${v}</option>`).join("");
+  }
+
+  function filtrarTabela() {
+    const clienteSelecionado = document.getElementById("filtroCliente").value;
+    const vendaSelecionada = document.getElementById("filtroVenda").value;
+    const tbody = document.querySelector("#tabelaRegistros tbody");
+    tbody.innerHTML = "";
+
+    registros
+      .filter(r => (!clienteSelecionado || r.cliente === clienteSelecionado))
+      .filter(r => (!vendaSelecionada || r.numeroVenda === vendaSelecionada))
+      .forEach(reg => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${reg.cliente}</td>
+          <td>${reg.numeroVenda}</td>
+          <td>${reg.produto}</td>
+          <td>${reg.bobinas.map(b => `${b.tipo} - ${b.lote}`).join("<br>")}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+  }
+
+  function imprimirClienteSelecionado() {
+    const cliente = document.getElementById("filtroCliente").value;
+    const venda = document.getElementById("filtroVenda").value;
+
+    // Filtra os registros conforme filtros selecionados
+    const registrosFiltrados = registros
+      .filter(r => (!cliente || r.cliente === cliente))
+      .filter(r => (!venda || r.numeroVenda === venda));
+
+    if (registrosFiltrados.length === 0) {
+      alert("Nenhum registro para imprimir com os filtros atuais.");
+      return;
+    }
+
+    const janela = window.open('', '', 'width=800,height=600');
+    let html = `<h2></h2>`;
+    html += `<table border="1" style="width:100%;border-collapse: collapse;text-align: center;">
+      <tr><th>Cliente</th><th>Número da OS</th><th>Produto</th><th>Matéria-Prima / Lote</th></tr>`;
+
+    registrosFiltrados.forEach(reg => {
+      html += `<tr>
+        <td>${reg.cliente}</td>
+        <td>${reg.numeroVenda}</td>
+        <td>${reg.produto}</td>
+        <td>${reg.bobinas.map(b => `${b.tipo} - ${b.lote}`).join("<br>")}</td>
+      </tr>`;
+    });
+
+    html += "</table>";
+    janela.document.write(html);
+    janela.print();
+    janela.close();
+  }
+
+  window.onload = () => { adicionarProduto(); };
+</script>
+</body>
+</html>
+
