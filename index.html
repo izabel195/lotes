@@ -118,7 +118,8 @@
           <th>Cliente</th>
           <th>Número da OS</th>
           <th>Produto</th>
-          <th>Matéria-Prima / Lote</th>
+          <th>Matéria-Prima</th>
+          <th>Lote</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -141,7 +142,6 @@
   const produtosContainer = document.getElementById("produtos-container");
   let registros = [];
 
-  // Login
   auth.onAuthStateChanged(user => {
     if (user) {
       document.getElementById("login-area").classList.add("hidden");
@@ -176,9 +176,7 @@
       .catch(e => alert("Erro ao registrar: " + e.message));
   }
 
-  function logout() {
-    auth.signOut();
-  }
+  function logout() { auth.signOut(); }
 
   function adicionarProduto() {
     const divProduto = document.createElement("div");
@@ -197,12 +195,7 @@
   function removerProduto(btn) { btn.closest(".produto-group").remove(); }
 
   function adicionarBobina(btnOrContainer) {
-    let container;
-    if (btnOrContainer.classList.contains("bobinas-container")) {
-      container = btnOrContainer;
-    } else {
-      container = btnOrContainer.previousElementSibling;
-    }
+    let container = btnOrContainer.classList.contains("bobinas-container") ? btnOrContainer : btnOrContainer.previousElementSibling;
     const div = document.createElement("div");
     div.classList.add("bobina-group");
     div.innerHTML = `
@@ -282,14 +275,14 @@
   function atualizarTabela() {
     const tbody = document.querySelector("#tabelaRegistros tbody");
     tbody.innerHTML = "";
-
     registros.forEach(reg => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${reg.cliente}</td>
         <td>${reg.numeroVenda}</td>
         <td>${reg.produto}</td>
-        <td>${reg.bobinas.map(b => `${b.tipo} - ${b.lote}`).join("<br>")}</td>
+        <td>${reg.bobinas.map(b => b.tipo).join("<br>")}</td>
+        <td>${reg.bobinas.map(b => b.lote).join("<br>")}</td>
       `;
       tbody.appendChild(tr);
     });
@@ -321,48 +314,62 @@
           <td>${reg.cliente}</td>
           <td>${reg.numeroVenda}</td>
           <td>${reg.produto}</td>
-          <td>${reg.bobinas.map(b => `${b.tipo} - ${b.lote}`).join("<br>")}</td>
+          <td>${reg.bobinas.map(b => b.tipo).join("<br>")}</td>
+          <td>${reg.bobinas.map(b => b.lote).join("<br>")}</td>
         `;
         tbody.appendChild(tr);
       });
   }
 
-  function imprimirClienteSelecionado() {
-    const cliente = document.getElementById("filtroCliente").value;
-    const venda = document.getElementById("filtroVenda").value;
+  // --- IMPRESSÃO DO ROMANEIO COM LOGO ---
+ function imprimirClienteSelecionado() {
+  const cliente = document.getElementById("filtroCliente").value;
+  const venda = document.getElementById("filtroVenda").value;
 
-    // Filtra os registros conforme filtros selecionados
-    const registrosFiltrados = registros
-      .filter(r => (!cliente || r.cliente === cliente))
-      .filter(r => (!venda || r.numeroVenda === venda));
+  const registrosFiltrados = registros
+    .filter(r => (!cliente || r.cliente === cliente))
+    .filter(r => (!venda || r.numeroVenda === venda));
 
-    if (registrosFiltrados.length === 0) {
-      alert("Nenhum registro para imprimir com os filtros atuais.");
-      return;
-    }
-
-    const janela = window.open('', '', 'width=800,height=600');
-    let html = `<h2></h2>`;
-    html += `<table border="1" style="width:100%;border-collapse: collapse;text-align: center;">
-      <tr><th>Cliente</th><th>Número da OS</th><th>Produto</th><th>Matéria-Prima / Lote</th></tr>`;
-
-    registrosFiltrados.forEach(reg => {
-      html += `<tr>
-        <td>${reg.cliente}</td>
-        <td>${reg.numeroVenda}</td>
-        <td>${reg.produto}</td>
-        <td>${reg.bobinas.map(b => `${b.tipo} - ${b.lote}`).join("<br>")}</td>
-      </tr>`;
-    });
-
-    html += "</table>";
-    janela.document.write(html);
-    janela.print();
-    janela.close();
+  if (registrosFiltrados.length === 0) {
+    alert("Nenhum registro para imprimir com os filtros atuais.");
+    return;
   }
+
+  const janela = window.open('', '', 'width=900,height=650');
+  let html = `
+    <div style="text-align:center; margin-bottom: 20px;">
+      <img src="logo_kurma.jpg" style="max-width:180px; margin-bottom:10px;">
+      <h2 style="margin:0;">ROMANEIO DE BOBINAS</h2>
+      <small>Data de emissão: ${new Date().toLocaleDateString()}</small>
+    </div>
+    <table border="1" style="width:100%;border-collapse: collapse;text-align: center; font-family: Arial; font-size:14px;">
+      <tr style="background:#f1f1f1;">
+        <th>Cliente</th>
+        <th>Número da OS</th>
+        <th>Produto</th>
+        <th>Matéria-Prima</th>
+        <th>Lote</th>
+      </tr>`;
+
+  registrosFiltrados.forEach(reg => {
+    html += `<tr>
+      <td>${reg.cliente}</td>
+      <td>${reg.numeroVenda}</td>
+      <td>${reg.produto}</td>
+      <td>${reg.bobinas.map(b => b.tipo).join("<br>")}</td>
+      <td>${reg.bobinas.map(b => b.lote).join("<br>")}</td>
+    </tr>`;
+  });
+
+  html += `</table>`;
+  janela.document.write(html);
+  janela.print();
+  janela.close();
+}
 
   window.onload = () => { adicionarProduto(); };
 </script>
 </body>
 </html>
+
 
