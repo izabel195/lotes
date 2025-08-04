@@ -75,7 +75,27 @@
     .hidden { display: none; }
     h2 { color: #1a73e8; }
     label { font-weight: bold; margin-top: 10px; display: block; }
+
+    /* Logo no topo da impressão 
+    @media print {
+      body::before {
+        content: "";
+        display: block;
+        width: 200px;      /* ajuste a largura 
+        height: 100px;     /* ajuste a altura proporcional 
+        margin: 0 auto 10px auto;
+        background-image: url('./IMG/logo_kurma.jpg'); /* coloque sua logo na mesma pasta
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+      }
+    }
+  */
+
+ 
+
   </style>
+  <img src="./IMG/logo_kurma.jpg" alt="Logo" style="display:block; margin: 0 auto 15px auto; width: 200px; height: auto;" />
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -96,6 +116,8 @@
     <button class="logout" onclick="logout()">Sair</button>
 
     <input type="text" id="cliente" placeholder="Cliente" />
+    <input type="text" id="numeroOS" placeholder="Número da OS" /> <!-- CAMPO ADICIONADO -->
+
     <div id="produtos-container"></div>
     <button onclick="adicionarProduto()">+ Adicionar Produto</button>
     <button onclick="salvarRegistros()">Salvar</button>
@@ -116,10 +138,14 @@
       <thead>
         <tr>
           <th>Cliente</th>
-          <th>Número da OS</th>
+          <th>Número da OS</th> <!-- COLUNA ADICIONADA -->
+          <th>Número da Nota Fiscal</th>
+          <th>Tipo de Embalagem</th>
           <th>Produto</th>
-          <th>Matéria-Prima</th>
-          <th>Lote</th>
+          <th>Dimensão da Embalagem (LxC)</th>
+          <th>Peso Líquido (unit.)</th>
+          <th>Peso Bruto</th>
+          <th>Volume Total da Carga</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -141,6 +167,27 @@
 
   const produtosContainer = document.getElementById("produtos-container");
   let registros = [];
+
+  // Dados produtos já com largura, comprimento e peso
+  const produtosInfo = {
+    "Copo 80ml": { largura:23.5, comprimento:29.5, peso:3.268 },
+    "Copo 100ml": { largura:32.05, comprimento:27, peso:3.708 },
+    "Copo 220ml": { largura:37, comprimento:28, peso:5.928 },
+    "Copo 300ml": { largura:40, comprimento:32.5, peso:8.590 },
+    "Copo 400ml": { largura:37, comprimento:46, peso:0 },
+    "Copo 500ml": { largura:0, comprimento:0, peso:0 },
+    "Pote 100ml": { largura:35.5, comprimento:21.5, peso:4.07 },
+    "Pote 250ml": { largura:47, comprimento:38, peso:7.115 },
+    "Pote 590ml": { largura:50.5, comprimento:38.5, peso:5.054 },
+    "Canudo 10x210mm": { largura:56, comprimento:25, peso:4.000 },
+    "Canudo 10x298mm": { largura:67, comprimento:37, peso:12.000 },
+    "Canudo 08x210mm": { largura:36, comprimento:25, peso:3.000 },
+    "Canudo 08x110mm": { largura:36, comprimento:21, peso:2.000 },
+    "Canudo 05x240mm": { largura:36, comprimento:22, peso:3.000 },
+    "Canudo 05x197mm": { largura:37, comprimento:21, peso:2.000 },
+    "Solapa 12 05x197mm": { largura:32, comprimento:15, peso:2.000 },
+    "Solapa 22 05x197mm": { largura:30, comprimento:28, peso:4.000 },
+  };
 
   auth.onAuthStateChanged(user => {
     if (user) {
@@ -181,21 +228,81 @@
   function adicionarProduto() {
     const divProduto = document.createElement("div");
     divProduto.classList.add("produto-group");
+
+    // Opções de produto para o select
+    const optionsProduto = Object.keys(produtosInfo).map(p => `<option value="${p}">${p}</option>`).join("");
+
+    // Opções de tipo de embalagem (exemplo)
+    const optionsEmbalagem = `
+      <option value="">Selecione o Tipo de Embalagem</option>
+      <option value="Caixa">Caixa</option>
+      <option value="Saco">Saco</option>
+      <option value="Envelope">Envelope</option>
+      <option value="Outro">Outro</option>
+    `;
+
     divProduto.innerHTML = `
-      <input type="text" class="numeroVenda" placeholder="Número da Venda / Nota Fiscal" />
-      <input type="text" class="produto" placeholder="Produto" />
+      <input type="text" class="numeroNotaFiscal" placeholder="Número da Nota Fiscal" />
+
+      <select class="tipoEmbalagem">
+        ${optionsEmbalagem}
+      </select>
+
+      <select class="produto" onchange="preencherProduto(this)">
+        <option value="">Selecione o Produto</option>
+        ${optionsProduto}
+      </select>
+
+      <input type="text" class="dimensaoEmbalagem" placeholder="Dimensão da Embalagem (LxC)" readonly />
+
+      <input type="number" step="0.01" class="pesoLiquido" placeholder="Peso Líquido (unit.)" readonly />
+      <input type="number" step="0.01" class="pesoBruto" placeholder="Peso Bruto" readonly />
+      <input type="number" step="0.01" min="0" class="volumeTotalCarga" placeholder="Volume Total da Carga" value="0" oninput="atualizarPesoBruto(this)" />
+
       <div class="bobinas-container"></div>
       <button type="button" onclick="adicionarBobina(this)">+ Adicionar Bobina</button>
       <button type="button" onclick="removerProduto(this)" class="remove-produto-btn">Remover Produto</button>
     `;
+
     produtosContainer.appendChild(divProduto);
     adicionarBobina(divProduto.querySelector(".bobinas-container"));
   }
 
+  // Quando seleciona um produto, preenche peso, dimensao (LxC) e calcula peso bruto
+  function preencherProduto(select) {
+    const grupo = select.closest(".produto-group");
+    const produto = produtosInfo[select.value];
+    if (!produto) {
+      grupo.querySelector(".dimensaoEmbalagem").value = "";
+      grupo.querySelector(".pesoLiquido").value = "";
+      grupo.querySelector(".pesoBruto").value = "";
+      return;
+    }
+
+    // Preencher dimensao da embalagem concatenada LxC
+    const dimensao = `${produto.largura} x ${produto.comprimento}`;
+    grupo.querySelector(".dimensaoEmbalagem").value = dimensao;
+
+    // Preencher peso líquido
+    grupo.querySelector(".pesoLiquido").value = produto.peso;
+
+    atualizarPesoBruto(grupo.querySelector(".volumeTotalCarga"));
+  }
+
+  // Atualiza o peso bruto (peso líquido * volume)
+  function atualizarPesoBruto(element) {
+    const grupo = element.closest(".produto-group");
+    const peso = parseFloat(grupo.querySelector(".pesoLiquido").value) || 0;
+    const volume = parseFloat(grupo.querySelector(".volumeTotalCarga").value) || 0;
+    grupo.querySelector(".pesoBruto").value = (peso * volume).toFixed(2);
+  }
+
   function removerProduto(btn) { btn.closest(".produto-group").remove(); }
 
-  function adicionarBobina(btnOrContainer) {
-    let container = btnOrContainer.classList.contains("bobinas-container") ? btnOrContainer : btnOrContainer.previousElementSibling;
+  function adicionarBobina(containerBtn) {
+    let container = containerBtn.classList && containerBtn.classList.contains("bobinas-container")
+      ? containerBtn
+      : containerBtn.previousElementSibling;
     const div = document.createElement("div");
     div.classList.add("bobina-group");
     div.innerHTML = `
@@ -215,6 +322,7 @@
 
   async function salvarRegistros() {
     const cliente = document.getElementById("cliente").value.trim();
+    const numeroOS = document.getElementById("numeroOS").value.trim(); // Novo campo
     const user = auth.currentUser;
     if (!cliente || !user) {
       alert("Preencha o cliente e esteja logado.");
@@ -225,8 +333,14 @@
     const promessas = [];
 
     gruposProdutos.forEach(grupo => {
-      const numeroVenda = grupo.querySelector(".numeroVenda").value.trim();
+      const numeroNotaFiscal = grupo.querySelector(".numeroNotaFiscal").value.trim();
+      const tipoEmbalagem = grupo.querySelector(".tipoEmbalagem").value.trim();
       const produto = grupo.querySelector(".produto").value.trim();
+      const dimensaoEmbalagem = grupo.querySelector(".dimensaoEmbalagem").value.trim();
+      const pesoLiquido = parseFloat(grupo.querySelector(".pesoLiquido").value) || 0;
+      const pesoBruto = parseFloat(grupo.querySelector(".pesoBruto").value) || 0;
+      const volumeTotalCarga = parseFloat(grupo.querySelector(".volumeTotalCarga").value) || 0;
+
       const bobinas = [];
       grupo.querySelectorAll(".bobina-group").forEach(group => {
         const tipo = group.querySelector("select").value.trim();
@@ -234,11 +348,17 @@
         if (tipo && lote) bobinas.push({ tipo, lote });
       });
 
-      if (numeroVenda && produto && bobinas.length > 0) {
+      if (numeroNotaFiscal && tipoEmbalagem && produto && bobinas.length > 0) {
         const registro = {
           cliente,
-          numeroVenda,
+          numeroOS,  // campo novo salvo aqui
+          numeroNotaFiscal,
+          tipoEmbalagem,
           produto,
+          dimensaoEmbalagem,
+          pesoLiquido,
+          pesoBruto,
+          volumeTotalCarga,
           bobinas,
           criadoPor: user.email,
           data: firebase.firestore.FieldValue.serverTimestamp()
@@ -248,7 +368,7 @@
     });
 
     if (promessas.length === 0) {
-      alert("Preencha pelo menos um produto com suas bobinas corretamente.");
+      alert("Preencha pelo menos um produto com suas bobinas corretamente, incluindo Nota Fiscal e Tipo de Embalagem.");
       return;
     }
 
@@ -279,10 +399,14 @@
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${reg.cliente}</td>
-        <td>${reg.numeroVenda}</td>
+        <td>${reg.numeroOS || ""}</td> <!-- coluna nova -->
+        <td>${reg.numeroNotaFiscal || ""}</td>
+        <td>${reg.tipoEmbalagem || ""}</td>
         <td>${reg.produto}</td>
-        <td>${reg.bobinas.map(b => b.tipo).join("<br>")}</td>
-        <td>${reg.bobinas.map(b => b.lote).join("<br>")}</td>
+        <td>${reg.dimensaoEmbalagem || ""}</td>
+        <td>${reg.pesoLiquido?.toFixed(2) || ""}</td>
+        <td>${reg.pesoBruto?.toFixed(2) || ""}</td>
+        <td>${reg.volumeTotalCarga || ""}</td>
       `;
       tbody.appendChild(tr);
     });
@@ -293,83 +417,123 @@
     const filtroVenda = document.getElementById("filtroVenda");
 
     const clientes = [...new Set(registros.map(r => r.cliente))];
-    const vendas = [...new Set(registros.map(r => r.numeroVenda))];
+    const vendas = [...new Set(registros.map(r => r.numeroNotaFiscal))];
 
     filtroCliente.innerHTML = `<option value="">Todos</option>` + clientes.map(c => `<option>${c}</option>`).join("");
     filtroVenda.innerHTML = `<option value="">Todos</option>` + vendas.map(v => `<option>${v}</option>`).join("");
   }
 
   function filtrarTabela() {
-    const clienteSelecionado = document.getElementById("filtroCliente").value;
-    const vendaSelecionada = document.getElementById("filtroVenda").value;
+    const clienteFiltro = document.getElementById("filtroCliente").value;
+    const vendaFiltro = document.getElementById("filtroVenda").value;
     const tbody = document.querySelector("#tabelaRegistros tbody");
-    tbody.innerHTML = "";
 
-    registros
-      .filter(r => (!clienteSelecionado || r.cliente === clienteSelecionado))
-      .filter(r => (!vendaSelecionada || r.numeroVenda === vendaSelecionada))
-      .forEach(reg => {
+    tbody.innerHTML = "";
+    registros.forEach(reg => {
+      if ((clienteFiltro === "" || reg.cliente === clienteFiltro) &&
+          (vendaFiltro === "" || reg.numeroNotaFiscal === vendaFiltro)) {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${reg.cliente}</td>
-          <td>${reg.numeroVenda}</td>
+          <td>${reg.numeroOS || ""}</td>
+          <td>${reg.numeroNotaFiscal || ""}</td>
+          <td>${reg.tipoEmbalagem || ""}</td>
           <td>${reg.produto}</td>
-          <td>${reg.bobinas.map(b => b.tipo).join("<br>")}</td>
-          <td>${reg.bobinas.map(b => b.lote).join("<br>")}</td>
+          <td>${reg.dimensaoEmbalagem || ""}</td>
+          <td>${reg.pesoLiquido?.toFixed(2) || ""}</td>
+          <td>${reg.pesoBruto?.toFixed(2) || ""}</td>
+          <td>${reg.volumeTotalCarga || ""}</td>
         `;
         tbody.appendChild(tr);
-      });
+      }
+    });
   }
 
-  // --- IMPRESSÃO DO ROMANEIO COM LOGO ---
- function imprimirClienteSelecionado() {
-  const cliente = document.getElementById("filtroCliente").value;
-  const venda = document.getElementById("filtroVenda").value;
+  function imprimirClienteSelecionado() {
+    
+    const clienteFiltro = document.getElementById("filtroCliente").value;
+    const vendaFiltro = document.getElementById("filtroVenda").value;
 
-  const registrosFiltrados = registros
-    .filter(r => (!cliente || r.cliente === cliente))
-    .filter(r => (!venda || r.numeroVenda === venda));
+    const registrosFiltrados = registros.filter(reg =>
+      (clienteFiltro === "" || reg.cliente === clienteFiltro) &&
+      (vendaFiltro === "" || reg.numeroNotaFiscal === vendaFiltro)
+    );
 
-  if (registrosFiltrados.length === 0) {
-    alert("Nenhum registro para imprimir com os filtros atuais.");
-    return;
+    if (registrosFiltrados.length === 0) {
+      alert("Nenhum registro para imprimir com os filtros selecionados.");
+      return;
+    }
+
+    let html = `
+      <html>
+      <head>
+        <title>Impressão de Registros</title>
+        <style>
+          body { font-family: Arial; padding: 20px; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+          th { background-color: #eee; }
+  
   }
-
-  const janela = window.open('', '', 'width=900,height=650');
-  let html = `
-    <div style="text-align:center; margin-bottom: 20px;">
-      <img src="logo_kurma.jpg" style="max-width:180px; margin-bottom:10px;">
-      <h2 style="margin:0;"></h2>
-      <small>Data de emissão: ${new Date().toLocaleDateString()}</small>
-    </div>
-    <table border="1" style="width:100%;border-collapse: collapse;text-align: center; font-family: Arial; font-size:14px;">
-      <tr style="background:#f1f1f1;">
-        <th>Cliente</th>
-        <th>Número da OS</th>
-        <th>Produto</th>
-        <th>Matéria-Prima</th>
-        <th>Lote</th>
-      </tr>`;
-
-  registrosFiltrados.forEach(reg => {
-    html += `<tr>
-      <td>${reg.cliente}</td>
-      <td>${reg.numeroVenda}</td>
-      <td>${reg.produto}</td>
-      <td>${reg.bobinas.map(b => b.tipo).join("<br>")}</td>
-      <td>${reg.bobinas.map(b => b.lote).join("<br>")}</td>
-    </tr>`;
-  });
-
-  html += `</table>`;
-  janela.document.write(html);
-  janela.print();
-  janela.close();
 }
 
-  window.onload = () => { adicionarProduto(); };
+        </style>
+      </head>
+      <body>
+        <img src="./IMG/logo_kurma.jpg" alt="Logo" style="display:block; margin: 0 auto 15px auto; width: 200px; height: auto;" />
+
+        <h2>ROMANEIO</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Número da OS</th>
+              <th>Número da Nota Fiscal</th>
+              <th>Tipo de Embalagem</th>
+              <th>Produto</th>
+              <th>Dimensão da Embalagem (LxC)</th>
+              <th>Peso Líquido (unit.)</th>
+              <th>Peso Bruto</th>
+              <th>Volume Total da Carga</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+    
+
+    registrosFiltrados.forEach(reg => {
+      html += `
+        <tr>
+          <td>${reg.cliente}</td>
+          <td>${reg.numeroOS || ""}</td>
+          <td>${reg.numeroNotaFiscal || ""}</td>
+          <td>${reg.tipoEmbalagem || ""}</td>
+          <td>${reg.produto}</td>
+          <td>${reg.dimensaoEmbalagem || ""}</td>
+          <td>${reg.pesoLiquido?.toFixed(2) || ""}</td>
+          <td>${reg.pesoBruto?.toFixed(2) || ""}</td>
+          <td>${reg.volumeTotalCarga || ""}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    const win = window.open("", "_blank");
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    win.print();
+    win.close();
+  }
+
+  // Inicializa com um produto já para facilitar
+  adicionarProduto();
 </script>
 </body>
 </html>
-
-
