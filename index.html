@@ -2,538 +2,566 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Cadastro de Bobinas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Romaneio - Remetente Fixo</title>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 1000px;
-      margin: auto;
-      padding: 20px;
-      background-color: #f9f9f9;
-      color: #333;
+    :root{
+      --bg:#f7f7fb; --fg:#1f2937; --muted:#6b7280; --brand:#2563eb; --card:#ffffff; --line:#e5e7eb;
     }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    input:focus, select:focus {
-      outline: none;
-      border-color: #1a73e8;
-      box-shadow: 0 0 5px rgba(26, 115, 232, 0.4);
-    }
-    button {
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background-color 0.3s ease;
-    }
-    button:hover { background-color: #1669c1; }
-    button.logout { background-color: #c0392b; }
-    button.logout:hover { background-color: #a93226; }
-    .remove-bobina-btn, .remove-produto-btn {
-      background-color: #e74c3c;
-      color: white;
-      padding: 6px 10px;
-      border: none;
-      border-radius: 4px;
-      margin-top: 5px;
-      font-size: 14px;
-    }
-    .remove-bobina-btn:hover, .remove-produto-btn:hover {
-      background-color: #c0392b;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background-color: #fff;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-    th { background-color: #f1f1f1; }
-    .produto-group {
-      border: 2px solid #1a73e8;
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 6px;
-      background-color: #ffffff;
-    }
-    .bobina-group {
-      border: 1px dashed #999;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 4px;
-      background-color: #fefefe;
-    }
-    .hidden { display: none; }
-    h2 { color: #1a73e8; }
-    label { font-weight: bold; margin-top: 10px; display: block; }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;margin:0;background:var(--bg);color:var(--fg)}
+    header{position:sticky;top:0;background:linear-gradient(180deg,#ffffff 0%,#ffffffd9 70%,#ffffff00);backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--line);z-index:5}
+    .wrap{max-width:1100px;margin:auto;padding:16px}
+    h1{margin:0;font-size:clamp(18px,2.6vw,26px)}
+    .grid{display:grid;gap:12px}
+    .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    @media (max-width:820px){.g2,.g3,.g4{grid-template-columns:1fr}}
+    label{font-size:12px;color:var(--muted)}
+    input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--fg);font-size:14px}
+    textarea{min-height:84px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+    .muted{color:var(--muted)}
+    .btn{appearance:none;border:1px solid transparent;border-radius:12px;padding:10px 14px;background:var(--brand);color:#fff;font-weight:600;cursor:pointer}
+    .btn.secondary{background:#fff;color:var(--fg);border-color:var(--line)}
+    .btn.ghost{background:transparent;color:var(--brand);border-color:var(--brand)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;font-size:14px}
+    th{font-weight:700;background:#fafafa}
+    tfoot td{font-weight:700}
+    .row-actions button{margin-right:6px}
+    .tags{display:flex;flex-wrap:wrap;gap:6px}
+    .tag{font-size:12px;border:1px solid var(--line);padding:6px 8px;border-radius:999px;background:#fff}
 
-    /* Logo no topo da impressão 
-    @media print {
-      body::before {
-        content: "";
-        display: block;
-        width: 200px;      /* ajuste a largura 
-        height: 100px;     /* ajuste a altura proporcional 
-        margin: 0 auto 10px auto;
-        background-image: url('./IMG/logo_kurma.jpg'); /* coloque sua logo na mesma pasta
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: contain;
-      }
+    /* Impressão */
+    @media print{
+      header,.actions{display:none!important}
+      body{background:#fff}
+      .print-container{padding:0;margin:0}
+      .card{border:none}
+      .logo{filter:grayscale(1)}
     }
-  */
-
- 
-
   </style>
   <img src="./IMG/logo_kurma.jpg" alt="Logo" style="display:block; margin: 0 auto 15px auto; width: 200px; height: auto;" />
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <div id="login-area">
-    <h2>Login</h2>
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="senha" placeholder="Senha" />
-    <label><input type="checkbox" id="mostrarSenha" onchange="toggleSenha()" /> Mostrar senha</label>
-    <button onclick="login()">Entrar</button>
-    <button onclick="registrar()">Registrar</button>
-  </div>
+  <header>
+    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <h1>Romaneio • Remetente Fixo</h1>
+      <div class="tags">
+        <span class="tag">Firebase + Firestore</span>
+        <span class="tag">Impressão</span>
+      </div>
+    </div>
+  </header>
 
-  <div id="app-area" class="hidden">
-    <button class="logout" onclick="logout()">Sair</button>
-
-    <input type="text" id="cliente" placeholder="Cliente" />
-    <input type="text" id="numeroOS" placeholder="Número da OS" /> <!-- CAMPO ADICIONADO -->
-
-    <div id="produtos-container"></div>
-    <button onclick="adicionarProduto()">+ Adicionar Produto</button>
-    <button onclick="salvarRegistros()">Salvar</button>
-
-    <label>Filtrar por Cliente:</label>
-    <select id="filtroCliente" onchange="filtrarTabela()">
-      <option value="">Todos</option>
+  <main class="wrap grid" style="gap:20px">
+    <!-- ROMANEIO FORM -->
+    <section class="card">
+      <div class="grid g2">
+        <div style="display:flex;gap:12px;align-items:center">
+          <div style="display:flex;gap:12px;align-items:center">
+  <div class="logo" id="remetenteLogo" style="width:56px;height:56px;border-radius:14px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:800">MD</div>
+  <div>
+    <select id="remetenteSelect" style="width:100%;padding:6px;font-weight:600;">
+      <option value="1">MARIA DIVINA AEROPIPA</option>
+      <option value="2">EMPRESA B</option>
     </select>
-
-    <label>Filtrar por Número da Venda:</label>
-    <select id="filtroVenda" onchange="filtrarTabela()">
-      <option value="">Todos</option>
-    </select>
-
-    <button onclick="imprimirClienteSelecionado()">Imprimir Seleção</button>
-
-    <table id="tabelaRegistros">
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Número da OS</th> <!-- COLUNA ADICIONADA -->
-          <th>Número da Nota Fiscal</th>
-          <th>Tipo de Embalagem</th>
-          <th>Produto</th>
-          <th>Dimensão da Embalagem (LxC)</th>
-          <th>Peso Líquido (unit.)</th>
-          <th>Peso Bruto</th>
-          <th>Volume Total da Carga</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div class="muted" id="remetenteEndereco" style="font-size:13px">R. Jacirendi, 574, Anexo 582 — Tatuapé — São Paulo/SP — 03080-000</div>
+    <div class="muted" id="remetenteTel" style="font-size:13px">Tel: 11 94024-0545</div>
   </div>
+</div>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCse9Zq2XdjUwN91pzNxF5pItSVR9b2fJ8",
-    authDomain: "lote-de-pido.firebaseapp.com",
-    projectId: "lote-de-pido",
-    storageBucket: "lote-de-pido.appspot.com",
-    messagingSenderId: "273534472187",
-    appId: "1:273534472187:web:b35eca45015f3c27fe055e"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+        </div>
+        <div style="text-align:right">
+          <div class="muted">Remetente fixo</div>
+          <div style="font-weight:700">ROMANEIO</div>
+        </div>
+      </div>
 
-  const produtosContainer = document.getElementById("produtos-container");
-  let registros = [];
+      <div class="grid g4" style="margin-top:14px">
+        <div><label>Número NFE</label><input id="nfeNumero" placeholder="000000" /></div>
+        <div><label>Data NFE</label><input id="nfeData" type="date" /></div>
+        <div><label>Nº Remessa</label><input id="remessaNumero" placeholder="00000" /></div>
+        <div><label>Faturamento</label><input id="faturamento" placeholder="000000" /></div>
+      </div>
 
-  // Dados produtos já com largura, comprimento e peso
-  const produtosInfo = {
-    "Copo 80ml": { largura:23.5, comprimento:29.5, peso:3.268 },
-    "Copo 100ml": { largura:32.05, comprimento:27, peso:3.708 },
-    "Copo 220ml": { largura:37, comprimento:28, peso:5.928 },
-    "Copo 300ml": { largura:40, comprimento:32.5, peso:8.590 },
-    "Copo 400ml": { largura:37, comprimento:46, peso:0 },
-    "Copo 500ml": { largura:0, comprimento:0, peso:0 },
-    "Pote 100ml": { largura:35.5, comprimento:21.5, peso:4.07 },
-    "Pote 250ml": { largura:47, comprimento:38, peso:7.115 },
-    "Pote 590ml": { largura:50.5, comprimento:38.5, peso:5.054 },
-    "Canudo 10x210mm": { largura:56, comprimento:25, peso:4.000 },
-    "Canudo 10x298mm": { largura:67, comprimento:37, peso:12.000 },
-    "Canudo 08x210mm": { largura:36, comprimento:25, peso:3.000 },
-    "Canudo 08x110mm": { largura:36, comprimento:21, peso:2.000 },
-    "Canudo 05x240mm": { largura:36, comprimento:22, peso:3.000 },
-    "Canudo 05x197mm": { largura:37, comprimento:21, peso:2.000 },
-    "Solapa 12 05x197mm": { largura:32, comprimento:15, peso:2.000 },
-    "Solapa 22 05x197mm": { largura:30, comprimento:28, peso:4.000 },
-  };
+      <div class="grid g2" style="margin-top:10px">
+        <div><label>Comprador</label><textarea id="comprador" placeholder="Nome, CNPJ/CPF, endereço"></textarea></div>
+        <div><label>Recebedor</label><textarea id="recebedor" placeholder="Nome/Setor, endereço de entrega"></textarea></div>
+      </div>
 
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      document.getElementById("login-area").classList.add("hidden");
-      document.getElementById("app-area").classList.remove("hidden");
-      carregarRegistrosEmTempoReal();
-    } else {
-      document.getElementById("login-area").classList.remove("hidden");
-      document.getElementById("app-area").classList.add("hidden");
-      registros = [];
-      atualizarTabela();
-      atualizarFiltro();
-    }
-  });
-
-  function toggleSenha() {
-    const senhaInput = document.getElementById("senha");
-    senhaInput.type = senhaInput.type === "password" ? "text" : "password";
-  }
-
-  function login() {
-    const email = document.getElementById("email").value;
-    const senha = document.getElementById("senha").value;
-    auth.signInWithEmailAndPassword(email, senha)
-      .catch(e => alert("Erro ao entrar: " + e.message));
-  }
-
-  function registrar() {
-    const email = document.getElementById("email").value;
-    const senha = document.getElementById("senha").value;
-    auth.createUserWithEmailAndPassword(email, senha)
-      .then(() => alert("Conta criada com sucesso!"))
-      .catch(e => alert("Erro ao registrar: " + e.message));
-  }
-
-  function logout() { auth.signOut(); }
-
-  function adicionarProduto() {
-    const divProduto = document.createElement("div");
-    divProduto.classList.add("produto-group");
-
-    // Opções de produto para o select
-    const optionsProduto = Object.keys(produtosInfo).map(p => `<option value="${p}">${p}</option>`).join("");
-
-    // Opções de tipo de embalagem (exemplo)
-    const optionsEmbalagem = `
-      <option value="">Selecione o Tipo de Embalagem</option>
-      <option value="Caixa">Caixa</option>
-      <option value="Saco">Saco</option>
-      <option value="Envelope">Envelope</option>
-      <option value="Outro">Outro</option>
-    `;
-
-    divProduto.innerHTML = `
-      <input type="text" class="numeroNotaFiscal" placeholder="Número da Nota Fiscal" />
-
-      <select class="tipoEmbalagem">
-        ${optionsEmbalagem}
-      </select>
-
-      <select class="produto" onchange="preencherProduto(this)">
-        <option value="">Selecione o Produto</option>
-        ${optionsProduto}
-      </select>
-
-      <input type="text" class="dimensaoEmbalagem" placeholder="Dimensão da Embalagem (LxC)" readonly />
-
-      <input type="number" step="0.01" class="pesoLiquido" placeholder="Peso Líquido (unit.)" readonly />
-      <input type="number" step="0.01" class="pesoBruto" placeholder="Peso Bruto" readonly />
-      <input type="number" step="0.01" min="0" class="volumeTotalCarga" placeholder="Volume Total da Carga" value="0" oninput="atualizarPesoBruto(this)" />
-
-      <div class="bobinas-container"></div>
-      <button type="button" onclick="adicionarBobina(this)">+ Adicionar Bobina</button>
-      <button type="button" onclick="removerProduto(this)" class="remove-produto-btn">Remover Produto</button>
-    `;
-
-    produtosContainer.appendChild(divProduto);
-    adicionarBobina(divProduto.querySelector(".bobinas-container"));
-  }
-
-  // Quando seleciona um produto, preenche peso, dimensao (LxC) e calcula peso bruto
-  function preencherProduto(select) {
-    const grupo = select.closest(".produto-group");
-    const produto = produtosInfo[select.value];
-    if (!produto) {
-      grupo.querySelector(".dimensaoEmbalagem").value = "";
-      grupo.querySelector(".pesoLiquido").value = "";
-      grupo.querySelector(".pesoBruto").value = "";
-      return;
-    }
-
-    // Preencher dimensao da embalagem concatenada LxC
-    const dimensao = `${produto.largura} x ${produto.comprimento}`;
-    grupo.querySelector(".dimensaoEmbalagem").value = dimensao;
-
-    // Preencher peso líquido
-    grupo.querySelector(".pesoLiquido").value = produto.peso;
-
-    atualizarPesoBruto(grupo.querySelector(".volumeTotalCarga"));
-  }
-
-  // Atualiza o peso bruto (peso líquido * volume)
-  function atualizarPesoBruto(element) {
-    const grupo = element.closest(".produto-group");
-    const peso = parseFloat(grupo.querySelector(".pesoLiquido").value) || 0;
-    const volume = parseFloat(grupo.querySelector(".volumeTotalCarga").value) || 0;
-    grupo.querySelector(".pesoBruto").value = (peso * volume).toFixed(2);
-  }
-
-  function removerProduto(btn) { btn.closest(".produto-group").remove(); }
-
-  function adicionarBobina(containerBtn) {
-    let container = containerBtn.classList && containerBtn.classList.contains("bobinas-container")
-      ? containerBtn
-      : containerBtn.previousElementSibling;
-    const div = document.createElement("div");
-    div.classList.add("bobina-group");
-    div.innerHTML = `
-      <select>
-        <option value="">Selecione a Bobina</option>
-        <option value="FSC">FSC</option>
-        <option value="SUZANO">SUZANO</option>
-        <option value="KLABIN">KLABIN</option>
-      </select>
-      <input type="text" placeholder="Lote da Bobina" />
-      <button type="button" class="remove-bobina-btn" onclick="removerBobina(this)">Remover</button>
-    `;
-    container.appendChild(div);
-  }
-
-  function removerBobina(btn) { btn.parentElement.remove(); }
-
-  async function salvarRegistros() {
-    const cliente = document.getElementById("cliente").value.trim();
-    const numeroOS = document.getElementById("numeroOS").value.trim(); // Novo campo
-    const user = auth.currentUser;
-    if (!cliente || !user) {
-      alert("Preencha o cliente e esteja logado.");
-      return;
-    }
-
-    const gruposProdutos = document.querySelectorAll(".produto-group");
-    const promessas = [];
-
-    gruposProdutos.forEach(grupo => {
-      const numeroNotaFiscal = grupo.querySelector(".numeroNotaFiscal").value.trim();
-      const tipoEmbalagem = grupo.querySelector(".tipoEmbalagem").value.trim();
-      const produto = grupo.querySelector(".produto").value.trim();
-      const dimensaoEmbalagem = grupo.querySelector(".dimensaoEmbalagem").value.trim();
-      const pesoLiquido = parseFloat(grupo.querySelector(".pesoLiquido").value) || 0;
-      const pesoBruto = parseFloat(grupo.querySelector(".pesoBruto").value) || 0;
-      const volumeTotalCarga = parseFloat(grupo.querySelector(".volumeTotalCarga").value) || 0;
-
-      const bobinas = [];
-      grupo.querySelectorAll(".bobina-group").forEach(group => {
-        const tipo = group.querySelector("select").value.trim();
-        const lote = group.querySelector("input").value.trim();
-        if (tipo && lote) bobinas.push({ tipo, lote });
-      });
-
-      if (numeroNotaFiscal && tipoEmbalagem && produto && bobinas.length > 0) {
-        const registro = {
-          cliente,
-          numeroOS,  // campo novo salvo aqui
-          numeroNotaFiscal,
-          tipoEmbalagem,
-          produto,
-          dimensaoEmbalagem,
-          pesoLiquido,
-          pesoBruto,
-          volumeTotalCarga,
-          bobinas,
-          criadoPor: user.email,
-          data: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        promessas.push(db.collection("bobinas").add(registro));
-      }
-    });
-
-    if (promessas.length === 0) {
-      alert("Preencha pelo menos um produto com suas bobinas corretamente, incluindo Nota Fiscal e Tipo de Embalagem.");
-      return;
-    }
-
-    try {
-      await Promise.all(promessas);
-      produtosContainer.innerHTML = "";
-      adicionarProduto();
-      alert("Registros salvos com sucesso!");
-    } catch (error) {
-      console.error("Erro ao salvar:", error);
-      alert("Erro ao salvar: " + error.message);
-    }
-  }
-
-  function carregarRegistrosEmTempoReal() {
-    db.collection("bobinas").orderBy("data", "desc")
-      .onSnapshot(snapshot => {
-        registros = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        atualizarTabela();
-        atualizarFiltro();
-      });
-  }
-
-  function atualizarTabela() {
-    const tbody = document.querySelector("#tabelaRegistros tbody");
-    tbody.innerHTML = "";
-    registros.forEach(reg => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${reg.cliente}</td>
-        <td>${reg.numeroOS || ""}</td> <!-- coluna nova -->
-        <td>${reg.numeroNotaFiscal || ""}</td>
-        <td>${reg.tipoEmbalagem || ""}</td>
-        <td>${reg.produto}</td>
-        <td>${reg.dimensaoEmbalagem || ""}</td>
-        <td>${reg.pesoLiquido?.toFixed(2) || ""}</td>
-        <td>${reg.pesoBruto?.toFixed(2) || ""}</td>
-        <td>${reg.volumeTotalCarga || ""}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  function atualizarFiltro() {
-    const filtroCliente = document.getElementById("filtroCliente");
-    const filtroVenda = document.getElementById("filtroVenda");
-
-    const clientes = [...new Set(registros.map(r => r.cliente))];
-    const vendas = [...new Set(registros.map(r => r.numeroNotaFiscal))];
-
-    filtroCliente.innerHTML = `<option value="">Todos</option>` + clientes.map(c => `<option>${c}</option>`).join("");
-    filtroVenda.innerHTML = `<option value="">Todos</option>` + vendas.map(v => `<option>${v}</option>`).join("");
-  }
-
-  function filtrarTabela() {
-    const clienteFiltro = document.getElementById("filtroCliente").value;
-    const vendaFiltro = document.getElementById("filtroVenda").value;
-    const tbody = document.querySelector("#tabelaRegistros tbody");
-
-    tbody.innerHTML = "";
-    registros.forEach(reg => {
-      if ((clienteFiltro === "" || reg.cliente === clienteFiltro) &&
-          (vendaFiltro === "" || reg.numeroNotaFiscal === vendaFiltro)) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${reg.cliente}</td>
-          <td>${reg.numeroOS || ""}</td>
-          <td>${reg.numeroNotaFiscal || ""}</td>
-          <td>${reg.tipoEmbalagem || ""}</td>
-          <td>${reg.produto}</td>
-          <td>${reg.dimensaoEmbalagem || ""}</td>
-          <td>${reg.pesoLiquido?.toFixed(2) || ""}</td>
-          <td>${reg.pesoBruto?.toFixed(2) || ""}</td>
-          <td>${reg.volumeTotalCarga || ""}</td>
-        `;
-        tbody.appendChild(tr);
-      }
-    });
-  }
-
-  function imprimirClienteSelecionado() {
-    
-    const clienteFiltro = document.getElementById("filtroCliente").value;
-    const vendaFiltro = document.getElementById("filtroVenda").value;
-
-    const registrosFiltrados = registros.filter(reg =>
-      (clienteFiltro === "" || reg.cliente === clienteFiltro) &&
-      (vendaFiltro === "" || reg.numeroNotaFiscal === vendaFiltro)
-    );
-
-    if (registrosFiltrados.length === 0) {
-      alert("Nenhum registro para imprimir com os filtros selecionados.");
-      return;
-    }
-
-    let html = `
-      <html>
-      <head>
-        <title>Impressão de Registros</title>
-        <style>
-          body { font-family: Arial; padding: 20px; }
-          table { width: 100%; border-collapse: collapse; }
-          th, td { border: 1px solid #000; padding: 8px; text-align: center; }
-          th { background-color: #eee; }
-  
-  }
-}
-
-        </style>
-      </head>
-      <body>
-        <img src="./IMG/logo_kurma.jpg" alt="Logo" style="display:block; margin: 0 auto 15px auto; width: 200px; height: auto;" />
-
-        <h2>ROMANEIO</h2>
-        <table>
+      <h3 style="margin:16px 0 8px 0">Itens</h3>
+      <div class="actions" style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn" id="addItem">+ Adicionar item</button>
+        <button class="btn secondary" id="clearItems">Limpar itens</button>
+      </div>
+      <div class="table-wrap" style="overflow:auto;border:1px solid var(--line);border-radius:12px">
+        <table id="itensTable">
           <thead>
             <tr>
-              <th>Cliente</th>
-              <th>Número da OS</th>
-              <th>Número da Nota Fiscal</th>
-              <th>Tipo de Embalagem</th>
-              <th>Produto</th>
-              <th>Dimensão da Embalagem (LxC)</th>
-              <th>Peso Líquido (unit.)</th>
+              <th>Cód. Produto</th>
+              <th>Descrição do Produto</th>
+              <th>Nº do Lote</th>
+              <th>Tipo de Carga</th>
+              <th>Qtd Volumes</th>
+              <th>U.M</th>
+              <th>Peso Líq.</th>
               <th>Peso Bruto</th>
-              <th>Volume Total da Carga</th>
+              <th>L (cm)</th>
+              <th>A (cm)</th>
+              <th>C (cm)</th>
+              <th>Ações</th>
             </tr>
           </thead>
-          <tbody>
-    `;
-    
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4">Totais</td>
+              <td id="totalVolumes">0</td>
+              <td>—</td>
+              <td id="totalLiq">0</td>
+              <td id="totalBruto">0</td>
+              <td colspan="3">—</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
 
-    registrosFiltrados.forEach(reg => {
-      html += `
-        <tr>
-          <td>${reg.cliente}</td>
-          <td>${reg.numeroOS || ""}</td>
-          <td>${reg.numeroNotaFiscal || ""}</td>
-          <td>${reg.tipoEmbalagem || ""}</td>
-          <td>${reg.produto}</td>
-          <td>${reg.dimensaoEmbalagem || ""}</td>
-          <td>${reg.pesoLiquido?.toFixed(2) || ""}</td>
-          <td>${reg.pesoBruto?.toFixed(2) || ""}</td>
-          <td>${reg.volumeTotalCarga || ""}</td>
-        </tr>
-      `;
+      <div class="actions" style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+        <button class="btn ghost" id="printRomaneio">Imprimir</button>
+        <button class="btn" id="salvarRomaneio">Salvar no Firestore</button>
+      </div>
+    </section>
+
+    <!-- LISTAGEM -->
+    <section class="card listagem">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <h3 style="margin:0">Romaneios Salvos</h3>
+        <button class="btn secondary" id="recarregar">Recarregar</button>
+      </div>
+      <div style="overflow:auto;margin-top:10px">
+        <table id="listaRomaneios">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>NFE</th>
+              <th>Remessa</th>
+              <th>Comprador</th>
+              <th>Recebedor</th>
+              <th>Volumes</th>
+              <th>Peso Líq.</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Template do item -->
+  <template id="tpl-item">
+    <tr>
+      <td><input placeholder="Cód" data-field="cod"/></td>
+      <td><input placeholder="Descrição" data-field="descricao"/></td>
+      <td><input placeholder="Lote" data-field="lote"/></td>
+      <td><input placeholder="Tipo" data-field="tipo"/></td>
+      <td><input type="number" min="0" step="1" value="0" data-field="volumes"/></td>
+      <td>
+        <select data-field="um">
+          <option>KG</option>
+          <option>UN</option>
+          <option>PC</option>
+        </select>
+      </td>
+      <td><input type="number" min="0" step="0.01" value="0" data-field="pesoLiq"/></td>
+      <td><input type="number" min="0" step="0.01" value="0" data-field="pesoBruto"/></td>
+      <td><input type="number" min="0" step="0.01" value="0" data-field="dimL"/></td>
+      <td><input type="number" min="0" step="0.01" value="0" data-field="dimA"/></td>
+      <td><input type="number" min="0" step="0.01" value="0" data-field="dimC"/></td>
+      <td class="row-actions">
+        <button class="btn secondary" data-action="dup">Duplicar</button>
+        <button class="btn secondary" data-action="del">Remover</button>
+      </td>
+    </tr>
+  </template>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getFirestore, collection, addDoc, getDocs, doc, getDoc, serverTimestamp, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCse9Zq2XdjUwN91pzNxF5pItSVR9b2fJ8",
+      authDomain: "lote-de-pido.firebaseapp.com",
+      projectId: "lote-de-pido",
+      storageBucket: "lote-de-pido.firebasestorage.app",
+      messagingSenderId: "273534472187",
+      appId: "1:273534472187:web:b35eca45015f3c27fe055e",
+      measurementId: "G-YC45VZ79H4"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    const state = { itens: [] };
+    const sender = {
+      nome: 'MARIA DIVINA AEROPIPA DO B F L L T',
+      endereco: 'R. Jacirendi, 574, Anexo 582 — Tatuapé — São Paulo/SP — 03080-000',
+      telefone: '11 94024-0545'
+      
+      
+    };
+    const empresas = {
+  '1': { nome:'MARIA DIVINA AEROPIPA', endereco:'R. Jacirendi, 574, Anexo 582 — Tatuapé — São Paulo/SP — 03080-000', telefone:'11 94024-0545', logo:'MD' },
+  '2': { nome:'EMPRESA B', endereco:'Rua Exemplo, 123 — Centro — São Paulo/SP', telefone:'11 99999-9999', logo:'EB' }
+};
+const remetenteSelect = document.getElementById('remetenteSelect');
+const remetenteLogo   = document.getElementById('remetenteLogo');
+const remetenteEndereco = document.getElementById('remetenteEndereco');
+const remetenteTel    = document.getElementById('remetenteTel');
+
+function atualizarRemetente(){
+  const val = remetenteSelect.value;
+  const dados = empresas[val];
+  remetenteLogo.textContent = dados.logo;
+  remetenteEndereco.textContent = dados.endereco;
+  remetenteTel.textContent = 'Tel: ' + dados.telefone;
+  sender.nome = dados.nome;
+  sender.endereco = dados.endereco;
+  sender.telefone = dados.telefone;
+}
+
+
+// Inicializa com a primeira empresa
+atualizarRemetente();
+
+remetenteSelect.addEventListener('change', atualizarRemetente);
+
+
+    const els = {
+      nfeNumero: document.getElementById('nfeNumero'),
+      nfeData: document.getElementById('nfeData'),
+      remessaNumero: document.getElementById('remessaNumero'),
+      faturamento: document.getElementById('faturamento'),
+      comprador: document.getElementById('comprador'),
+      recebedor: document.getElementById('recebedor'),
+      itensTable: document.getElementById('itensTable'),
+      tplItem: document.getElementById('tpl-item'),
+      totalVolumes: document.getElementById('totalVolumes'),
+      totalLiq: document.getElementById('totalLiq'),
+      totalBruto: document.getElementById('totalBruto'),
+      addItem: document.getElementById('addItem'),
+      clearItems: document.getElementById('clearItems'),
+      salvar: document.getElementById('salvarRomaneio'),
+      print: document.getElementById('printRomaneio'),
+      recarregar: document.getElementById('recarregar'),
+      listaRomaneios: document.getElementById('listaRomaneios').querySelector('tbody')
+    };
+    const produtos = {
+  "Canudo 10x210mm": { largura:56, comprimento:25, peso:4.000 },
+  "Canudo 10x298mm": { largura:67, comprimento:37, peso:12.000 },
+  "Canudo 08x210mm": { largura:36, comprimento:25, peso:3.000 },
+  "Canudo 08x110mm": { largura:36, comprimento:21, peso:2.000 },
+  "Canudo 05x240mm": { largura:36, comprimento:22, peso:3.000 },
+  "Canudo 05x197mm": { largura:37, comprimento:21, peso:2.000 },
+  "Solapa 12 05x197mm": { largura:32, comprimento:15, peso:2.000 },
+  "Solapa 22 05x197mm": { largura:30, comprimento:28, peso:4.000 },
+};
+
+
+    function fmt(n){
+      const v = Number(n||0);
+      if (isNaN(v)) return '0';
+      const isIntLike = Number.isInteger(v);
+      return v.toLocaleString('pt-BR', {minimumFractionDigits: isIntLike?0:2, maximumFractionDigits: isIntLike?0:2});
+    }
+
+    function recalc(){
+      const sum = state.itens.reduce((acc,it)=>{
+        acc.vol += Number(it.volumes||0);
+        acc.liq += Number(it.pesoLiq||0);
+        acc.bru += Number(it.pesoBruto||0);
+        return acc;
+      },{vol:0,liq:0,bru:0});
+      els.totalVolumes.textContent = fmt(sum.vol);
+      els.totalLiq.textContent = fmt(sum.liq);
+      els.totalBruto.textContent = fmt(sum.bru);
+    }
+
+    function bindRowInputs(tr, row){
+      const inputs = tr.querySelectorAll('[data-field]');
+      inputs.forEach(i=>{
+        const k = i.dataset.field;
+        if(row[k] !== undefined) i.value = row[k];
+        row[k] = (i.type==='number') ? Number(i.value||0) : i.value;
+        const ev = (i.tagName === 'SELECT') ? 'change' : 'input';
+        i.addEventListener(ev,()=>{
+          row[k] = (i.type==='number') ? Number(i.value||0) : i.value;
+          recalc();
+        });
+      });
+    }
+
+    function addItem(data={}){
+      const tr = els.tplItem.content.firstElementChild.cloneNode(true);
+      const row = { cod:'', descricao:'', lote:'', tipo:'', volumes:0, um:'KG', pesoLiq:0, pesoBruto:0, dimL:0, dimA:0, dimC:0, ...data };
+      tr.__row = row;
+      state.itens.push(row);
+      bindRowInputs(tr, row);
+      tr.querySelector('[data-action="dup"]').addEventListener('click',()=> addItem({...row}));
+      tr.querySelector('[data-action="del"]').addEventListener('click',()=>{
+        const idx = state.itens.indexOf(row);
+        if(idx>-1){ state.itens.splice(idx,1); tr.remove(); recalc(); }
+      });
+      els.itensTable.querySelector('tbody').appendChild(tr);
+      recalc();
+    }
+
+    els.addItem.addEventListener('click',()=> addItem());
+    els.clearItems.addEventListener('click',()=>{
+      state.itens = [];
+      els.itensTable.querySelector('tbody').innerHTML='';
+      recalc();
     });
 
-    html += `
-          </tbody>
-        </table>
-      </body>
-      </html>
-    `;
+    els.print.addEventListener('click',()=>{
+      const payload = coletarPayloadTela();
+      imprimirRomaneio(payload, '(sem ID)');
+    });
 
-    const win = window.open("", "_blank");
-    win.document.write(html);
-    win.document.close();
-    win.focus();
-    win.print();
-    win.close();
-  }
+    function coletarPayloadTela(){
+      return {
+        remetente: sender,
+        nfeNumero: els.nfeNumero.value.trim(),
+        nfeData: els.nfeData.value || null,
+        remessaNumero: els.remessaNumero.value.trim(),
+        faturamento: els.faturamento.value.trim(),
+        comprador: els.comprador.value.trim(),
+        recebedor: els.recebedor.value.trim(),
+        itens: state.itens,
+        totais: {
+          volumes: state.itens.reduce((s,i)=> s + Number(i.volumes||0), 0),
+          pesoLiq: state.itens.reduce((s,i)=> s + Number(i.pesoLiq||0), 0),
+          pesoBruto: state.itens.reduce((s,i)=> s + Number(i.pesoBruto||0), 0)
+        }
+      };
+    }
 
-  // Inicializa com um produto já para facilitar
-  adicionarProduto();
-</script>
+    els.salvar.addEventListener('click', async ()=>{
+      try{
+        if(!state.itens.length){
+          alert('Adicione pelo menos 1 item.');
+          return;
+        }
+        const payload = { ...coletarPayloadTela(), criadoEm: serverTimestamp() };
+        const ref = await addDoc(collection(db,'romaneios'), payload);
+        alert('Romaneio salvo! ID: '+ref.id);
+        carregarLista();
+      }catch(err){
+        console.error(err);
+        alert('Erro ao salvar: '+err.message);
+      }
+    });
+
+    async function carregarLista(){
+      els.listaRomaneios.innerHTML = '<tr><td colspan="8" class="muted">Carregando...</td></tr>';
+      try{
+        const q = query(collection(db,'romaneios'), orderBy('criadoEm','desc'));
+        const snap = await getDocs(q);
+        els.listaRomaneios.innerHTML='';
+        snap.forEach(docu=>{
+          const d = docu.data();
+          const tr = document.createElement('tr');
+          const dataNfe = d.nfeData ? new Date(d.nfeData+'T00:00:00') : null;
+          tr.innerHTML = `
+            <td>${dataNfe? dataNfe.toLocaleDateString('pt-BR'): '—'}</td>
+            <td>${d.nfeNumero||'—'}</td>
+            <td>${d.remessaNumero||'—'}</td>
+            <td>${(d.comprador||'').slice(0,24)}${(d.comprador||'').length>24?'…':''}</td>
+            <td>${(d.recebedor||'').slice(0,24)}${(d.recebedor||'').length>24?'…':''}</td>
+            <td>${fmt(d.totais?.volumes||0)}</td>
+            <td>${fmt(d.totais?.pesoLiq||0)}</td>
+            <td>
+              <button class="btn secondary" data-id="${docu.id}" data-act="ver">Ver</button>
+              <button class="btn ghost" data-id="${docu.id}" data-act="imprimir">Imprimir</button>
+            </td>
+          `;
+          els.listaRomaneios.appendChild(tr);
+        });
+        if(!els.listaRomaneios.children.length){
+          els.listaRomaneios.innerHTML = '<tr><td colspan="8" class="muted">Nenhum romaneio salvo ainda.</td></tr>';
+        }
+      }catch(err){
+        console.error(err);
+        els.listaRomaneios.innerHTML = '<tr><td colspan="8">Erro ao carregar lista: '+err.message+'</td></tr>';
+      }
+    }
+
+    els.recarregar.addEventListener('click', carregarLista);
+
+    document.addEventListener('click', async (ev)=>{
+      const btn = ev.target.closest('button[data-act]');
+      if(!btn) return;
+      const id = btn.getAttribute('data-id');
+      const act = btn.getAttribute('data-act');
+      if(!id) return;
+      try{
+        const dref = doc(db,'romaneios',id);
+        const ds = await getDoc(dref);
+        if(!ds.exists()) return alert('Registro não encontrado.');
+        const data = ds.data();
+        if(act==='ver'){
+          visualizarRomaneio(data, id);
+        }
+        if(act==='imprimir'){
+          imprimirRomaneio(data, id);
+        }
+      }catch(err){
+        alert('Erro: '+err.message);
+      }
+    });
+
+    function visualizarRomaneio(d, id){
+      const w = window.open('', '_blank');
+      w.document.write(renderRomaneioHTML(d,id));
+      w.document.close();
+    }
+
+    function imprimirRomaneio(d, id){
+      const w = window.open('', '_blank');
+      w.document.write(renderRomaneioHTML(d,id, true));
+      w.document.close();
+      w.focus();
+      w.print();
+    }
+
+    function renderRomaneioHTML(d,id,autoPrint=false){
+      const itensRows = (d.itens||[]).map((it)=>`
+        <tr>
+          <td>${it.cod||''}</td>
+          <td>${it.descricao||''}</td>
+          <td>${it.lote||''}</td>
+          <td>${it.tipo||''}</td>
+          <td style="text-align:right">${fmt(it.volumes||0)}</td>
+          <td>${it.um||'KG'}</td>
+          <td style="text-align:right">${fmt(it.pesoLiq||0)}</td>
+          <td style="text-align:right">${fmt(it.pesoBruto||0)}</td>
+          <td style="text-align:right">${fmt(it.dimL||0)}</td>
+          <td style="text-align:right">${fmt(it.dimA||0)}</td>
+          <td style="text-align:right">${fmt(it.dimC||0)}</td>
+        </tr>
+      `).join('');
+
+      const styles = `
+        <style>
+          @page { size: A4; margin: 10mm 10mm 12mm 10mm; }
+          body { font-family: Arial, sans-serif; font-size:9pt; margin:0; color:#000 }
+          .sheet{width: 190mm; margin:0 auto;}
+          .header {border:2px solid #000; padding:4mm; margin-bottom:3mm; display:flex; justify-content:space-between; align-items:center}
+          .header .logo{width:25mm; height:25mm; border:2px solid #000; display:flex; align-items:center; justify-content:center; font-weight:800}
+          .header .info{font-size:10pt; font-weight:bold}
+          table{width:100%; border-collapse:collapse; margin-top:2mm}
+          th, td{border:1px solid #000; padding:2mm; font-size:9pt}
+          th{background:#ddd; font-weight:700; text-align:center}
+          tfoot td{font-weight:700; background:#f5f5f5}
+          .grid2{display:grid; grid-template-columns:1fr 1fr; gap:2mm; margin-top:2mm}
+          .box{border:1px solid #000; padding:2mm; min-height:20mm}
+          .sign-row{display:grid; grid-template-columns:1fr 1fr; gap:10mm; margin-top:8mm}
+          .sign{border-top:1px solid #000; text-align:center; padding-top:2mm; font-size:9pt}
+        </style>`;
+
+      const html = `<!doctype html><html><head><meta charset='utf-8'><title>Romaneio ${id||''}</title>${styles}</head>
+      <body>
+        <div class="sheet">
+          <div class="header">
+            <div style="display:flex; gap:4mm; align-items:center">
+              <div class="logo">MD</div>
+              <div>
+                <div class="info">${d.remetente?.nome||'MARIA DIVINA AEROPIPA DO B F L L T'}</div>
+                <div>${d.remetente?.endereco||'R. Jacirendi, 574 — Tatuapé/SP'}</div>
+                <div>Tel: ${d.remetente?.telefone||'11 94024-0545'}</div>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:bold; font-size:12pt">ROMANEIO</div>
+              <div>ID: ${id||'—'}</div>
+            </div>
+          </div>
+
+          <table>
+            <tr>
+              <th>Nº NFE</th>
+              <th>Data NFE</th>
+              <th>Nº Remessa</th>
+              <th>Faturamento</th>
+              <th>Volumes</th>
+              <th>Peso Líq.</th>
+              <th>Peso Bruto</th>
+            </tr>
+            <tr>
+              <td>${d.nfeNumero||''}</td>
+              <td>${d.nfeData? new Date(d.nfeData+'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
+              <td>${d.remessaNumero||''}</td>
+              <td>${d.faturamento||''}</td>
+              <td style="text-align:right">${fmt(d.totais?.volumes||0)}</td>
+              <td style="text-align:right">${fmt(d.totais?.pesoLiq||0)}</td>
+              <td style="text-align:right">${fmt(d.totais?.pesoBruto||0)}</td>
+            </tr>
+          </table>
+
+          <div class="grid2">
+            <div class="box"><strong>COMPRADOR</strong><br>${(d.comprador||'').replace(/\n/g,'<br>')}</div>
+            <div class="box"><strong>RECEBEDOR</strong><br>${(d.recebedor||'').replace(/\n/g,'<br>')}</div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Cód.</th>
+                <th>Descrição</th>
+                <th>Lote</th>
+                <th>Tipo</th>
+                <th>Volumes</th>
+                <th>U.M</th>
+                <th>Peso Líq.</th>
+                <th>Peso Bruto</th>
+                <th>L</th>
+                <th>A</th>
+                <th>C</th>
+              </tr>
+            </thead>
+            <tbody>${itensRows||''}</tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4"><strong>Totais</strong></td>
+                <td style="text-align:right">${fmt(d.totais?.volumes||0)}</td>
+                <td></td>
+                <td style="text-align:right">${fmt(d.totais?.pesoLiq||0)}</td>
+                <td style="text-align:right">${fmt(d.totais?.pesoBruto||0)}</td>
+                <td colspan="3"></td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div class="sign-row">
+            <div class="sign">Assinatura do Remetente</div>
+            <div class="sign">Assinatura do Recebedor</div>
+          </div>
+        </div>
+        ${autoPrint?'<script>window.onload=()=>window.print()<\\/script>':''}
+      </body></html>`;
+      return html;
+    }
+
+    addItem();
+    carregarLista();
+    
+  </script>
 </body>
 </html>
