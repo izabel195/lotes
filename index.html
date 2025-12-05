@@ -1,1 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Não Encontrada | Erro 404</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 40px;
+            text-align: center;
+            margin: 20px;
+        }
+        
+        .error-code {
+            font-size: 8rem;
+            font-weight: 800;
+            color: #ff4757;
+            line-height: 1;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0 rgba(255, 71, 87, 0.1);
+        }
+        
+        .error-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #2d3436;
+        }
+        
+        .error-message {
+            font-size: 1.2rem;
+            color: #636e72;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .error-illustration {
+            margin: 30px 0;
+            font-size: 150px;
+            color: #ffa502;
+        }
+        
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background-color: #3742fa;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2f36d4;
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(55, 66, 250, 0.2);
+        }
+        
+        .btn-secondary {
+            background-color: #dfe4ea;
+            color: #2d3436;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #ced6e0;
+            transform: translateY(-3px);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .search-box {
+            margin-top: 30px;
+            display: flex;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #dfe4ea;
+            border-radius: 50px 0 0 50px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .search-input:focus {
+            border-color: #3742fa;
+        }
+        
+        .search-button {
+            background-color: #3742fa;
+            color: white;
+            border: none;
+            border-radius: 0 50px 50px 0;
+            padding: 0 25px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s;
+        }
+        
+        .search-button:hover {
+            background-color: #2f36d4;
+        }
+        
+        .links {
+            margin-top: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .link-item {
+            color: #636e72;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .link-item:hover {
+            color: #3742fa;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #636e72;
+            font-size: 0.9rem;
+        }
+        
+        .error-details {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: left;
+            display: none;
+        }
+        
+        .error-details summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: #3742fa;
+            margin-bottom: 10px;
+        }
+        
+        .error-details pre {
+            background-color: #2d3436;
+            color: #dfe4ea;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+        
+        .toggle-details {
+            margin-top: 20px;
+            background: none;
+            border: none;
+            color: #3742fa;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .error-code {
+                font-size: 6rem;
+            }
+            
+            .error-title {
+                font-size: 2rem;
+            }
+            
+            .error-illustration {
+                font-size: 120px;
+            }
+            
+            .btn {
+                padding: 12px 24px;
+                width: 100%;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                border-radius: 50px;
+                margin-bottom: 10px;
+            }
+            
+            .search-button {
+                border-radius: 50px;
+                padding: 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .error-code {
+                font-size: 5rem;
+            }
+            
+            .error-title {
+                font-size: 1.8rem;
+            }
+            
+            .error-message {
+                font-size: 1rem;
+            }
+            
+            .error-illustration {
+                font-size: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-illustration">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <div class="error-code">404</div>
+        
+        <h1 class="error-title">Página Não Encontrada</h1>
+        
+        <p class="error-message">
+            Desculpe, a página que você está procurando não existe ou foi movida.
+            Verifique o URL digitado ou utilize a busca abaixo para encontrar o que precisa.
+        </p>
+        
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="O que você está procurando?">
+            <button class="search-button">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+        
+        <div class="actions">
+            <a href="/" class="btn btn-primary">
+                <i class="fas fa-home"></i> Voltar para a Página Inicial
+            </a>
+            <a href="#" class="btn btn-secondary" id="goBack">
+                <i class="fas fa-arrow-left"></i> Voltar à Página Anterior
+            </a>
+        </div>
+        
+        <button class="toggle-details" id="toggleDetails">
+            <i class="fas fa-info-circle"></i> Mostrar Detalhes Técnicos
+        </button>
+        
+        <div class="error-details" id="errorDetails">
+            <summary>Detalhes do Erro</summary>
+            <p><strong>Código:</strong> 404 Not Found</p>
+            <p><strong>Mensagem:</strong> O recurso solicitado não foi encontrado neste servidor.</p>
+            <p><strong>Solução sugerida:</strong></p>
+            <ul>
+                <li>Verifique se o URL está digitado corretamente</li>
+                <li>Navegue para a página inicial e procure pelo conteúdo</li>
+                <li>Entre em contato com o suporte se o problema persistir</li>
+            </ul>
+            <pre>
+HTTP/1.1 404 Not Found
+Date: <span id="currentDate"></span>
+Server: Apache/2.4.41
+Content-Type: text/html; charset=UTF-8
+Connection: close
+            </pre>
+        </div>
+        
+        <div class="links">
+            <a href="#" class="link-item">Ajuda</a>
+            <a href="#" class="link-item">Suporte</a>
+            <a href="#" class="link-item">Mapa do Site</a>
+            <a href="#" class="link-item">Política de Privacidade</a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>&copy; <span id="currentYear"></span> Sua Empresa. Todos os direitos reservados.</p>
+    </div>
+
+    <script>
+        // Configurar data e ano atual
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Configurar data atual para o detalhe técnico
+        const now = new Date();
+        const formattedDate = now.toUTCString();
+        document.getElementById('currentDate').textContent = formattedDate;
+        
+        // Botão para voltar à página anterior
+        document.getElementById('goBack').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.history.back();
+        });
+        
+        // Alternar visibilidade dos detalhes do erro
+        document.getElementById('toggleDetails').addEventListener('click', function() {
+            const details = document.getElementById('errorDetails');
+            const isHidden = details.style.display === 'none' || details.style.display === '';
+            
+            if (isHidden) {
+                details.style.display = 'block';
+                this.innerHTML = '<i class="fas fa-times-circle"></i> Ocultar Detalhes Técnicos';
+            } else {
+                details.style.display = 'none';
+                this.innerHTML = '<i class="fas fa-info-circle"></i> Mostrar Detalhes Técnicos';
+            }
+        });
+        
+        // Simulação de busca (apenas para demonstração)
+        document.querySelector('.search-button').addEventListener('click', function() {
+            const searchInput = document.querySelector('.search-input');
+            if (searchInput.value.trim() !== '') {
+                alert(`Você buscou por: "${searchInput.value}".\n\nEm uma implementação real, esta busca seria processada.`);
+                searchInput.value = '';
+            } else {
+                alert('Por favor, digite algo para buscar.');
+            }
+        });
+        
+        // Permitir busca com a tecla Enter
+        document.querySelector('.search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.querySelector('.search-button').click();
+            }
+        });
+        
+        // Adicionar efeito de digitação ao código de erro (opcional)
+        const errorCode = document.querySelector('.error-code');
+        const originalText = errorCode.textContent;
+        errorCode.textContent = '';
+        
+        let i = 0;
+        function typeWriter() {
+            if (i < originalText.length) {
+                errorCode.textContent += originalText.charAt(i);
+                i++;
+                setTimeout(typeWriter, 150);
+            }
+        }
+        
+        // Iniciar o efeito de digitação após um pequeno atraso
+        setTimeout(typeWriter, 500);
+    </script>
+</body>
+</html>
 
