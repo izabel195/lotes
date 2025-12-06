@@ -1,402 +1,2272 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página Não Encontrada | Erro 404</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Controle Financeiro Pessoal</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
+        /* Reset para mobile */
+        * { 
+            margin: 0; 
+            padding: 0; 
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333; 
+            line-height: 1.6;
+            padding: 10px;
+            font-size: 16px;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .container { 
+            max-width: 100%;
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            padding: 15px; 
+            overflow-x: hidden;
+        }
+        
+        /* Header otimizado para mobile */
+        .header { 
+            text-align: center; 
+            padding: 15px 10px; 
+            background: linear-gradient(90deg, #667eea, #764ba2); 
+            color: white; 
+            border-radius: 10px; 
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .header h1 { 
+            font-size: 1.5rem; 
+            margin-bottom: 8px;
+            padding-right: 40px;
+        }
+        
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        /* Resumo em grid para mobile */
+        .resumo { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 10px; 
+            margin-bottom: 20px;
+        }
+        
+        .card { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 10px; 
+            text-align: center; 
+            border-left: 4px solid #667eea;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .card h3 { 
+            color: #555; 
+            margin-bottom: 8px; 
+            font-size: 0.9rem;
+        }
+        
+        .valor { 
+            font-size: 1.4rem; 
+            font-weight: bold;
+            line-height: 1.2;
+        }
+        
+        .positivo { color: #28a745; }
+        .negativo { color: #dc3545; }
+        
+        /* Seções com melhor espaçamento */
+        .form-section, .filtros, .transacoes, .alertas, .relatorios { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        h2 { 
+            color: #667eea; 
+            margin-bottom: 15px; 
+            padding-bottom: 8px; 
+            border-bottom: 2px solid #f0f0f0;
+            font-size: 1.2rem;
+        }
+        
+        /* Formulário otimizado para mobile */
+        #form-transacao { 
+            display: flex; 
+            flex-direction: column;
+            gap: 12px; 
+            margin-bottom: 15px; 
+        }
+        
+        .form-group { 
+            display: flex; 
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .form-group label { 
+            margin-bottom: 5px; 
+            font-weight: 600; 
+            color: #555;
+            font-size: 0.95rem;
+        }
+        
+        .form-group input, .form-group select { 
+            padding: 12px; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            font-size: 1rem;
+            width: 100%;
+            height: 48px;
+        }
+        
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background: white url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 10px center;
+            background-size: 16px;
+        }
+        
+        /* Botões maiores para touch */
+        .btn { 
+            padding: 14px 20px; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-adicionar { background: #28a745; color: white; }
+        .btn-filtrar { background: #007bff; color: white; }
+        .btn-limpar { background: #6c757d; color: white; }
+        
+        /* Filtros em coluna única */
+        .filtros-container { 
+            display: flex; 
+            flex-direction: column;
+            gap: 12px; 
+            margin-top: 15px; 
+        }
+        
+        .filtros-container .btn {
+            margin-top: 5px;
+        }
+        
+        /* Tabela responsiva */
+        .table-container { 
+            overflow-x: auto; 
+            border-radius: 8px; 
+            border: 1px solid #ddd; 
+            margin-top: 15px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        
+        thead { 
+            background: #667eea; 
+            color: white; 
+            position: sticky;
+            top: 0;
+        }
+        
+        th, td { 
+            padding: 10px 8px; 
+            text-align: left; 
+            border-bottom: 1px solid #ddd; 
+            font-size: 0.9rem;
+        }
+        
+        tbody tr:hover { background: #f8f9fa; }
+        
+        /* Botões de ação otimizados */
+        .btn-excluir { 
+            background: #dc3545; 
+            color: white; 
+            padding: 8px 12px; 
+            border-radius: 6px; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 0.9rem;
+            min-width: 40px;
+            height: 36px;
+        }
+        
+        .btn-editar { 
+            background: #ffc107; 
+            color: #212529; 
+            padding: 8px 12px; 
+            border-radius: 6px; 
+            border: none; 
+            cursor: pointer;
+            min-width: 40px;
+            height: 36px;
+        }
+        
+        .btn-pago { 
+            background: #28a745; 
+            color: white; 
+            padding: 8px 12px; 
+            border-radius: 6px; 
+            border: none; 
+            cursor: pointer; 
+            margin-right: 5px;
+            font-size: 0.9rem;
+            min-width: 60px;
+            height: 36px;
+        }
+        
+        .actions-cell {
+            display: flex;
+            gap: 5px;
+            flex-wrap: nowrap;
+        }
+        
+        /* Footer */
+        .footer { 
+            text-align: center; 
+            padding: 15px; 
+            background: #f8f9fa; 
+            border-radius: 10px; 
+            margin-top: 20px;
+        }
+        
+        .footer-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        /* Relatórios em coluna única */
+        .relatorios-container { 
+            display: flex; 
+            flex-direction: column;
+            gap: 15px; 
+            margin-top: 15px; 
+        }
+        
+        .relatorio-card { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 10px;
+        }
+        
+        /* Alertas otimizados */
+        .alerta-item { 
+            background: #fff3cd; 
+            border: 1px solid #ffeaa7; 
+            border-radius: 8px; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            display: flex; 
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .alerta-hoje { background: #ffebee; border: 1px solid #ffcdd2; }
+        .alerta-amanha { background: #fff3e0; border: 1px solid #ffcc80; }
+        .alerta-proximo { background: #e8f5e9; border: 1px solid #a5d6a7; }
+        
+        /* Modal otimizado para mobile */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.7); 
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .modal-content { 
+            background: white; 
+            margin: 0 auto; 
+            padding: 20px; 
+            border-radius: 12px; 
+            width: 100%; 
+            max-width: 400px;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .close-modal { 
+            position: absolute; 
+            right: 15px; 
+            top: 10px; 
+            font-size: 24px; 
+            cursor: pointer; 
+            color: #666;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Notificação mobile */
+        .notificacao { 
+            position: fixed; 
+            top: 10px; 
+            right: 10px; 
+            left: 10px;
+            background: #ff4444; 
+            color: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+            z-index: 1001; 
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        /* Login mobile */
+        .login-container { 
+            max-width: 100%; 
+            margin: 20px auto; 
+            padding: 20px; 
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            text-align: center; 
+        }
+        
+        .login-form { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+        }
+        
+        .login-form input { 
+            padding: 14px; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            font-size: 1rem;
+            height: 50px;
+        }
+        
+        .btn-login { 
+            background: #667eea; 
+            color: white; 
+            padding: 14px; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 1rem; 
+            cursor: pointer;
+            height: 50px;
+        }
+        
+        /* Firebase status mobile */
+        .firebase-status { 
+            position: fixed; 
+            bottom: 10px; 
+            right: 10px; 
+            background: #28a745; 
+            color: white; 
+            padding: 8px 12px; 
+            border-radius: 8px; 
+            font-size: 0.8rem; 
+            display: none;
+            z-index: 999;
+        }
+        
+        .firebase-status.offline { background: #dc3545; }
+        
+        /* Loading */
+        .loading { 
+            display: none; 
+            text-align: center; 
+            padding: 30px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            z-index: 2000;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #333;
-            padding: 20px;
         }
         
-        .container {
-            max-width: 800px;
-            width: 100%;
-            background-color: white;
-            border-radius: 20px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            padding: 40px;
-            text-align: center;
-            margin: 20px;
+        .loading i { 
+            font-size: 3rem; 
+            color: #667eea; 
+            margin-bottom: 15px;
         }
         
-        .error-code {
-            font-size: 8rem;
-            font-weight: 800;
-            color: #ff4757;
-            line-height: 1;
-            margin-bottom: 10px;
-            text-shadow: 3px 3px 0 rgba(255, 71, 87, 0.1);
-        }
-        
-        .error-title {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: #2d3436;
-        }
-        
-        .error-message {
-            font-size: 1.2rem;
-            color: #636e72;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .error-illustration {
-            margin: 30px 0;
-            font-size: 150px;
-            color: #ffa502;
-        }
-        
-        .actions {
+        /* Botões flutuantes para ações rápidas */
+        .floating-buttons {
+            position: fixed;
+            bottom: 80px;
+            right: 15px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 30px;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 900;
         }
         
-        .btn {
-            padding: 15px 30px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-flex;
+        .floating-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            border: none;
+            display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-            border: none;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             cursor: pointer;
         }
         
-        .btn-primary {
-            background-color: #3742fa;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #2f36d4;
-            transform: translateY(-3px);
-            box-shadow: 0 7px 14px rgba(55, 66, 250, 0.2);
-        }
-        
-        .btn-secondary {
-            background-color: #dfe4ea;
-            color: #2d3436;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #ced6e0;
-            transform: translateY(-3px);
-        }
-        
-        .btn i {
-            margin-right: 8px;
-        }
-        
-        .search-box {
-            margin-top: 30px;
-            display: flex;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .search-input {
-            flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #dfe4ea;
-            border-radius: 50px 0 0 50px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        
-        .search-input:focus {
-            border-color: #3742fa;
-        }
-        
-        .search-button {
-            background-color: #3742fa;
-            color: white;
-            border: none;
-            border-radius: 0 50px 50px 0;
-            padding: 0 25px;
-            cursor: pointer;
-            font-size: 1.1rem;
-            transition: background-color 0.3s;
-        }
-        
-        .search-button:hover {
-            background-color: #2f36d4;
-        }
-        
-        .links {
-            margin-top: 40px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-        }
-        
-        .link-item {
-            color: #636e72;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .link-item:hover {
-            color: #3742fa;
-        }
-        
-        .footer {
-            margin-top: 40px;
-            text-align: center;
-            color: #636e72;
-            font-size: 0.9rem;
-        }
-        
-        .error-details {
-            background-color: #f9f9f9;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 30px;
-            text-align: left;
+        /* Menu hamburguer para mobile */
+        .menu-toggle {
             display: none;
-        }
-        
-        .error-details summary {
-            font-weight: 600;
-            cursor: pointer;
-            color: #3742fa;
-            margin-bottom: 10px;
-        }
-        
-        .error-details pre {
-            background-color: #2d3436;
-            color: #dfe4ea;
-            padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-size: 0.9rem;
-            margin-top: 15px;
-        }
-        
-        .toggle-details {
-            margin-top: 20px;
+            position: absolute;
+            right: 15px;
+            top: 15px;
             background: none;
             border: none;
-            color: #3742fa;
+            color: white;
+            font-size: 1.5rem;
             cursor: pointer;
-            font-size: 0.9rem;
+            z-index: 100;
         }
         
-        @media (max-width: 768px) {
-            .container {
-                padding: 30px 20px;
+        .user-menu {
+            display: flex;
+            gap: 5px;
+        }
+        
+        /* Checkbox otimizado para touch */
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        /* Melhorias para telas muito pequenas */
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1.3rem; }
+            .valor { font-size: 1.2rem; }
+            .card { padding: 12px; }
+            .btn { padding: 12px 16px; font-size: 0.95rem; }
+            th, td { padding: 8px 6px; font-size: 0.85rem; }
+            
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
             }
             
-            .error-code {
-                font-size: 6rem;
-            }
-            
-            .error-title {
-                font-size: 2rem;
-            }
-            
-            .error-illustration {
-                font-size: 120px;
-            }
-            
-            .btn {
-                padding: 12px 24px;
+            .user-menu {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
                 width: 100%;
             }
             
-            .search-box {
-                flex-direction: column;
-            }
-            
-            .search-input {
-                border-radius: 50px;
-                margin-bottom: 10px;
-            }
-            
-            .search-button {
-                border-radius: 50px;
-                padding: 12px;
+            .user-menu .btn {
+                width: 100%;
             }
         }
         
-        @media (max-width: 480px) {
-            .error-code {
-                font-size: 5rem;
+        /* Tablets e telas maiores */
+        @media (min-width: 768px) {
+            .resumo { grid-template-columns: repeat(4, 1fr); }
+            .filtros-container { 
+                display: grid; 
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+                gap: 15px; 
             }
-            
-            .error-title {
-                font-size: 1.8rem;
+            #form-transacao { 
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
             }
-            
-            .error-message {
-                font-size: 1rem;
-            }
-            
-            .error-illustration {
-                font-size: 100px;
-            }
+        }
+        
+        /* Suporte para modo paisagem */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .card { min-height: 70px; padding: 10px; }
+            .valor { font-size: 1.2rem; }
+            .btn { padding: 10px 14px; min-height: 40px; }
+            .modal-content { max-height: 80vh; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="error-illustration">
-            <i class="fas fa-exclamation-triangle"></i>
+    <!-- Firebase Status -->
+    <div id="firebase-status" class="firebase-status">
+        <i class="fas fa-cloud"></i> <span id="status-text">Conectado</span>
+    </div>
+
+    <!-- Notificação de alerta -->
+    <div id="notificacao-alerta" class="notificacao">
+        <div style="flex: 1;">
+            <i class="fas fa-bell"></i> <span id="texto-notificacao">Você tem contas para pagar hoje!</span>
         </div>
-        
-        <div class="error-code">404</div>
-        
-        <h1 class="error-title">Página Não Encontrada</h1>
-        
-        <p class="error-message">
-            Desculpe, a página que você está procurando não existe ou foi movida.
-            Verifique o URL digitado ou utilize a busca abaixo para encontrar o que precisa.
-        </p>
-        
-        <div class="search-box">
-            <input type="text" class="search-input" placeholder="O que você está procurando?">
-            <button class="search-button">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-        
-        <div class="actions">
-            <a href="/" class="btn btn-primary">
-                <i class="fas fa-home"></i> Voltar para a Página Inicial
-            </a>
-            <a href="#" class="btn btn-secondary" id="goBack">
-                <i class="fas fa-arrow-left"></i> Voltar à Página Anterior
-            </a>
-        </div>
-        
-        <button class="toggle-details" id="toggleDetails">
-            <i class="fas fa-info-circle"></i> Mostrar Detalhes Técnicos
+        <button id="btn-fechar-notificacao" style="background:none; border:none; color:white; margin-left:10px; cursor:pointer;">
+            <i class="fas fa-times"></i>
         </button>
-        
-        <div class="error-details" id="errorDetails">
-            <summary>Detalhes do Erro</summary>
-            <p><strong>Código:</strong> 404 Not Found</p>
-            <p><strong>Mensagem:</strong> O recurso solicitado não foi encontrado neste servidor.</p>
-            <p><strong>Solução sugerida:</strong></p>
-            <ul>
-                <li>Verifique se o URL está digitado corretamente</li>
-                <li>Navegue para a página inicial e procure pelo conteúdo</li>
-                <li>Entre em contato com o suporte se o problema persistir</li>
-            </ul>
-            <pre>
-HTTP/1.1 404 Not Found
-Date: <span id="currentDate"></span>
-Server: Apache/2.4.41
-Content-Type: text/html; charset=UTF-8
-Connection: close
-            </pre>
-        </div>
-        
-        <div class="links">
-            <a href="#" class="link-item">Ajuda</a>
-            <a href="#" class="link-item">Suporte</a>
-            <a href="#" class="link-item">Mapa do Site</a>
-            <a href="#" class="link-item">Política de Privacidade</a>
+    </div>
+
+    <!-- Tela de Login -->
+    <div id="login-container" class="login-container">
+        <h2><i class="fas fa-wallet"></i> Controle Financeiro</h2>
+        <p>Faça login para acessar seu controle financeiro</p>
+        <form id="login-form" class="login-form">
+            <input type="email" id="login-email" placeholder="E-mail" required>
+            <input type="password" id="login-password" placeholder="Senha" required>
+            <button type="submit" class="btn-login">Entrar</button>
+        </form>
+        <div class="login-links">
+            <p>Não tem conta? <a href="#" id="btn-cadastrar">Cadastre-se</a></p>
+            <p><a href="#" id="btn-login-anonimo">Continuar sem conta (dados locais)</a></p>
         </div>
     </div>
-    
-    <div class="footer">
-        <p>&copy; <span id="currentYear"></span> Sua Empresa. Todos os direitos reservados.</p>
+
+    <!-- Tela de Cadastro -->
+    <div id="cadastro-container" class="login-container" style="display: none;">
+        <h2><i class="fas fa-user-plus"></i> Criar Conta</h2>
+        <form id="cadastro-form" class="login-form">
+            <input type="text" id="cadastro-nome" placeholder="Nome" required>
+            <input type="email" id="cadastro-email" placeholder="E-mail" required>
+            <input type="password" id="cadastro-password" placeholder="Senha (mínimo 6 caracteres)" required>
+            <input type="password" id="cadastro-confirm" placeholder="Confirmar Senha" required>
+            <button type="submit" class="btn-login">Criar Conta</button>
+        </form>
+        <div class="login-links">
+            <p>Já tem conta? <a href="#" id="btn-voltar-login">Voltar ao login</a></p>
+        </div>
+    </div>
+
+    <!-- Aplicação Principal (aparece após login) -->
+    <div id="app-container" class="container" style="display: none;">
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Carregando dados...</p>
+        </div>
+
+        <!-- Botões flutuantes -->
+        <div class="floating-buttons">
+            <button class="floating-btn" id="btn-floating-add" title="Nova transação">
+                <i class="fas fa-plus"></i>
+            </button>
+            <button class="floating-btn" id="btn-floating-filter" title="Filtrar" style="background: #007bff;">
+                <i class="fas fa-filter"></i>
+            </button>
+        </div>
+
+        <!-- Cabeçalho com usuário -->
+        <header class="header">
+            <div>
+                <h1><i class="fas fa-wallet"></i> Controle Financeiro</h1>
+                <div class="user-info">
+                    <div style="flex: 1;">
+                        <p>Bem-vindo, <span id="user-name">Usuário</span>!</p>
+                    </div>
+                    <div class="user-menu">
+                        <button id="btn-editar-perfil" class="btn" style="background:#007bff; color:white; flex: 1;">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <button id="btn-logout" class="btn" style="background:#dc3545; color:white; flex: 1;">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Resumo Financeiro -->
+        <section class="resumo">
+            <div class="card">
+                <h3><i class="fas fa-money-bill-wave"></i> Saldo</h3>
+                <p class="valor" id="saldo">R$ 0,00</p>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-arrow-up"></i> Receitas</h3>
+                <p class="valor positivo" id="total-receitas">R$ 0,00</p>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-arrow-down"></i> Despesas</h3>
+                <p class="valor negativo" id="total-despesas">R$ 0,00</p>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-bell"></i> Alertas</h3>
+                <p class="valor" id="alertas-hoje">0</p>
+            </div>
+        </section>
+
+        <!-- Formulário para Adicionar Transações (oculto inicialmente) -->
+        <section class="form-section" id="form-section" style="display: none;">
+            <h2><i class="fas fa-plus-circle"></i> Nova Transação</h2>
+            <form id="form-transacao">
+                <div class="form-group">
+                    <label for="descricao">Descrição:</label>
+                    <input type="text" id="descricao" required placeholder="Ex: Aluguel, Luz, Mercado...">
+                </div>
+                <div class="form-group">
+                    <label for="valor">Valor (R$):</label>
+                    <input type="number" id="valor" step="0.01" required placeholder="0,00">
+                </div>
+                <div class="form-group">
+                    <label for="tipo">Tipo:</label>
+                    <select id="tipo" required>
+                        <option value="receita">Receita</option>
+                        <option value="despesa">Despesa</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="categoria">Categoria:</label>
+                    <select id="categoria">
+                        <option value="outros">Outros</option>
+                        <option value="alimentacao">Alimentação</option>
+                        <option value="moradia">Moradia</option>
+                        <option value="transporte">Transporte</option>
+                        <option value="lazer">Lazer</option>
+                        <option value="saude">Saúde</option>
+                        <option value="educacao">Educação</option>
+                        <option value="contas">Contas Fixas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="data">Data:</label>
+                    <input type="date" id="data" required>
+                </div>
+                <div class="form-group">
+                    <label for="data-vencimento">Vencimento:</label>
+                    <input type="date" id="data-vencimento">
+                    <small style="color:#666; margin-top:5px; display:block;">Opcional</small>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" id="recorrente"> Despesa Recorrente
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status:</label>
+                    <select id="status">
+                        <option value="pendente">Pendente</option>
+                        <option value="pago">Pago</option>
+                        <option value="atrasado">Atrasado</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button type="submit" class="btn btn-adicionar" style="flex: 1;">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                    <button type="button" id="btn-cancelar-form" class="btn" style="background:#6c757d; color:white; flex: 1;">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- ALERTAS DE PAGAMENTO -->
+        <section class="alertas">
+            <h2><i class="fas fa-bell"></i> Alertas de Pagamento</h2>
+            <div id="container-alertas">
+                <!-- Preenchido via JavaScript -->
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button id="btn-config-alertas" class="btn" style="background:#6c757d; color:white; flex: 1;">
+                    <i class="fas fa-cog"></i> Configurar
+                </button>
+                <button id="btn-testar-alerta" class="btn" style="background:#17a2b8; color:white; flex: 1;">
+                    <i class="fas fa-bell"></i> Testar
+                </button>
+            </div>
+        </section>
+
+        <!-- Filtros (oculto inicialmente) -->
+        <section class="filtros" id="filtros-section" style="display: none;">
+            <h2><i class="fas fa-filter"></i> Filtros</h2>
+            <div class="filtros-container">
+                <div class="form-group">
+                    <label for="filtro-mes">Mês:</label>
+                    <select id="filtro-mes">
+                        <option value="todos">Todos os meses</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filtro-ano">Ano:</label>
+                    <select id="filtro-ano">
+                        <option value="todos">Todos os anos</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filtro-tipo">Tipo:</label>
+                    <select id="filtro-tipo">
+                        <option value="todos">Todos</option>
+                        <option value="receita">Receitas</option>
+                        <option value="despesa">Despesas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filtro-status">Status:</label>
+                    <select id="filtro-status">
+                        <option value="todos">Todos</option>
+                        <option value="pendente">Pendente</option>
+                        <option value="pago">Pago</option>
+                        <option value="atrasado">Atrasado</option>
+                    </select>
+                </div>
+                <button id="btn-aplicar-filtro" class="btn btn-filtrar">
+                    <i class="fas fa-search"></i> Filtrar
+                </button>
+                <button id="btn-limpar-filtro" class="btn btn-limpar">
+                    <i class="fas fa-times"></i> Limpar
+                </button>
+            </div>
+        </section>
+
+        <!-- Tabela de Transações -->
+        <section class="transacoes">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;"><i class="fas fa-list"></i> Transações</h2>
+                <button id="btn-toggle-filtros" class="btn" style="background:#6c757d; color:white; padding: 8px 12px;">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
+            <div class="table-container">
+                <table id="tabela-transacoes">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpo-tabela">
+                        <!-- Preenchido via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <p style="margin-top: 15px; text-align: center;">Total: <span id="contador-transacoes">0</span> transações</p>
+        </section>
+
+        <!-- Relatórios -->
+        <section class="relatorios">
+            <h2><i class="fas fa-chart-bar"></i> Relatórios</h2>
+            <div class="relatorios-container">
+                <div class="relatorio-card">
+                    <h3>Resumo do Mês</h3>
+                    <div id="resumo-mensal">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+                <div class="relatorio-card">
+                    <h3>Próximos Vencimentos</h3>
+                    <div id="proximos-vencimentos">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+                <div class="relatorio-card">
+                    <h3>Metas</h3>
+                    <div class="form-group">
+                        <label for="meta-mensal">Meta de Economia (R$):</label>
+                        <input type="number" id="meta-mensal" step="0.01" placeholder="Digite sua meta">
+                    </div>
+                    <button id="btn-definir-meta" class="btn" style="background:#ffc107; color:#212529; width:100%; margin-top:10px;">
+                        Definir Meta
+                    </button>
+                    <div id="progresso-meta" style="margin-top:15px;">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p><small>Sistema de Controle Financeiro</small></p>
+            <div class="footer-buttons">
+                <button id="btn-exportar" class="btn" style="background:#17a2b8; color:white;">
+                    <i class="fas fa-file-export"></i> Exportar
+                </button>
+                <button id="btn-limpar-tudo" class="btn" style="background:#dc3545; color:white;">
+                    <i class="fas fa-trash"></i> Limpar
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal de Configuração de Alertas -->
+    <div id="modal-config" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2><i class="fas fa-cog"></i> Configurar Alertas</h2>
+            <form id="form-config-alertas">
+                <div class="form-group">
+                    <label for="dias-alerta">
+                        <i class="fas fa-calendar-day"></i> Dias antes para alertar:
+                    </label>
+                    <input type="number" id="dias-alerta" min="0" max="30" value="3">
+                </div>
+                <div class="form-group">
+                    <label for="hora-alerta">
+                        <i class="fas fa-clock"></i> Hora do alerta:
+                    </label>
+                    <input type="time" id="hora-alerta" value="09:00">
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center;">
+                        <input type="checkbox" id="notificacao-desktop" checked>
+                        <i class="fas fa-bell"></i> Notificações
+                    </label>
+                </div>
+                <button type="button" id="btn-salvar-config" class="btn" style="background:#28a745; color:white; width:100%; margin-top: 15px;">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Edição de Perfil -->
+    <div id="modal-perfil" class="modal">
+        <div class="modal-content">
+            <span class="close-modal-perfil">&times;</span>
+            <h2><i class="fas fa-user-edit"></i> Editar Perfil</h2>
+            <form id="form-editar-perfil">
+                <div class="form-group">
+                    <label for="perfil-nome"><i class="fas fa-user"></i> Nome:</label>
+                    <input type="text" id="perfil-nome" placeholder="Seu nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="perfil-email"><i class="fas fa-envelope"></i> E-mail:</label>
+                    <input type="email" id="perfil-email" placeholder="seu@email.com" required disabled>
+                    <small style="color:#666; display:block;">O e-mail não pode ser alterado</small>
+                </div>
+                <div class="form-group">
+                    <label for="perfil-senha-atual"><i class="fas fa-lock"></i> Senha Atual:</label>
+                    <input type="password" id="perfil-senha-atual" placeholder="Para alterar senha">
+                </div>
+                <div class="form-group">
+                    <label for="perfil-nova-senha"><i class="fas fa-key"></i> Nova Senha:</label>
+                    <input type="password" id="perfil-nova-senha" placeholder="Nova senha">
+                </div>
+                <button type="button" id="btn-salvar-perfil" class="btn" style="background:#28a745; color:white; width:100%; margin-top:15px;">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+            </form>
+        </div>
     </div>
 
     <script>
-        // Configurar data e ano atual
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        // CONFIGURAÇÃO DO FIREBASE (mantida igual)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBvMPfb7rLzf5_YKgDdTVnNMvhISWTp3ig",
+            authDomain: "divids-d9a03.firebaseapp.com",
+            projectId: "divids-d9a03",
+            storageBucket: "divids-d9a03.firebasestorage.app",
+            messagingSenderId: "1039644207458",
+            appId: "1:1039644207458:web:8ed80359d3b6056bb1243b"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
         
-        // Configurar data atual para o detalhe técnico
-        const now = new Date();
-        const formattedDate = now.toUTCString();
-        document.getElementById('currentDate').textContent = formattedDate;
-        
-        // Botão para voltar à página anterior
-        document.getElementById('goBack').addEventListener('click', function(e) {
-            e.preventDefault();
-            window.history.back();
-        });
-        
-        // Alternar visibilidade dos detalhes do erro
-        document.getElementById('toggleDetails').addEventListener('click', function() {
-            const details = document.getElementById('errorDetails');
-            const isHidden = details.style.display === 'none' || details.style.display === '';
+        // Declarar variáveis globais
+        let db, auth;
+        let transacoes = [];
+        let metaEconomia = 0;
+        let configAlertas = {
+            diasAntes: 3,
+            horaAlerta: "09:00",
+            notificacaoDesktop: true,
+            alertaSom: true
+        };
+        let usuarioAtual = null;
+        let usandoFirebase = true;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarFirebase();
+            configurarEventListeners();
             
-            if (isHidden) {
-                details.style.display = 'block';
-                this.innerHTML = '<i class="fas fa-times-circle"></i> Ocultar Detalhes Técnicos';
+            // Configurar datas padrão
+            const hoje = new Date();
+            document.getElementById('data').value = hoje.toISOString().split('T')[0];
+            
+            const vencimento = new Date();
+            vencimento.setDate(vencimento.getDate() + 5);
+            document.getElementById('data-vencimento').value = vencimento.toISOString().split('T')[0];
+            
+            // Configurar teclado virtual para melhor experiência
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.type = 'tel';
+                    this.setAttribute('inputmode', 'decimal');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.type = 'number';
+                });
+            });
+        });
+
+        function inicializarFirebase() {
+            console.log("Firebase inicializado...");
+            
+            // Obter instâncias
+            db = firebase.firestore();
+            auth = firebase.auth();
+            
+            // Monitorar estado de autenticação
+            auth.onAuthStateChanged((user) => {
+                console.log("Estado de autenticação alterado:", user ? "Usuário logado" : "Usuário não logado");
+                if (user) {
+                    usuarioAtual = user;
+                    console.log("Usuário atual:", user.email, "UID:", user.uid);
+                    mostrarApp();
+                    
+                    criarEstruturaUsuario(user.uid, user.displayName || user.email.split('@')[0])
+                        .then(() => {
+                            carregarDadosFirebase();
+                            atualizarStatusFirebase(true);
+                            testarConexaoFirebase();
+                        })
+                        .catch(error => {
+                            console.error("Erro ao criar estrutura:", error);
+                            usarDadosLocais();
+                        });
+                } else {
+                    mostrarLogin();
+                    usuarioAtual = null;
+                }
+            });
+        }
+
+        // FUNÇÃO PARA CRIAR ESTRUTURA DO USUÁRIO
+        function criarEstruturaUsuario(uid, nomeUsuario) {
+            console.log("Criando/verificando estrutura para usuário:", uid);
+            
+            return db.collection('usuarios').doc(uid).get()
+                .then((doc) => {
+                    if (!doc.exists) {
+                        return db.collection('usuarios').doc(uid).set({
+                            nome: nomeUsuario,
+                            email: usuarioAtual.email,
+                            dataCriacao: firebase.firestore.FieldValue.serverTimestamp(),
+                            ultimoAcesso: firebase.firestore.FieldValue.serverTimestamp()
+                        }).then(() => {
+                            console.log("Documento do usuário criado com sucesso");
+                            
+                            const batch = db.batch();
+                            const alertasRef = db.collection('usuarios').doc(uid).collection('configuracoes').doc('alertas');
+                            const metaRef = db.collection('usuarios').doc(uid).collection('configuracoes').doc('meta');
+                            
+                            batch.set(alertasRef, configAlertas);
+                            batch.set(metaRef, { valor: 0 });
+                            
+                            return batch.commit();
+                        });
+                    } else {
+                        return db.collection('usuarios').doc(uid).update({
+                            ultimoAcesso: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                });
+        }
+
+        function configurarEventListeners() {
+            // Login
+            document.getElementById('login-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                fazerLogin();
+            });
+
+            // Cadastro
+            document.getElementById('cadastro-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                criarConta();
+            });
+
+            // Botões de navegação
+            document.getElementById('btn-cadastrar').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('cadastro-container').style.display = 'block';
+            });
+
+            document.getElementById('btn-voltar-login').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('cadastro-container').style.display = 'none';
+                document.getElementById('login-container').style.display = 'block';
+            });
+
+            document.getElementById('btn-login-anonimo').addEventListener('click', function(e) {
+                e.preventDefault();
+                usarDadosLocais();
+                mostrarApp();
+            });
+
+            // Botão Editar Perfil
+            document.getElementById('btn-editar-perfil').addEventListener('click', function() {
+                abrirModalPerfil();
+            });
+
+            // Logout
+            document.getElementById('btn-logout').addEventListener('click', function() {
+                auth.signOut().then(() => {
+                    mostrarNotificacao("Deslogado com sucesso", "success");
+                }).catch((error) => {
+                    mostrarNotificacao("Erro ao deslogar: " + error.message, "error");
+                });
+            });
+
+            // Formulário de nova transação
+            document.getElementById('form-transacao').addEventListener('submit', function(e) {
+                e.preventDefault();
+                adicionarTransacao();
+            });
+
+            // Cancelar formulário
+            document.getElementById('btn-cancelar-form').addEventListener('click', function() {
+                document.getElementById('form-section').style.display = 'none';
+                document.getElementById('form-transacao').reset();
+            });
+
+            // Botão flutuante para adicionar
+            document.getElementById('btn-floating-add').addEventListener('click', function() {
+                mostrarFormulario();
+            });
+
+            // Botão flutuante para filtrar
+            document.getElementById('btn-floating-filter').addEventListener('click', function() {
+                toggleFiltros();
+            });
+
+            // Toggle filtros
+            document.getElementById('btn-toggle-filtros').addEventListener('click', function() {
+                toggleFiltros();
+            });
+
+            // Filtrar transações
+            document.getElementById('btn-aplicar-filtro').addEventListener('click', atualizarTabela);
+
+            // Limpar filtros
+            document.getElementById('btn-limpar-filtro').addEventListener('click', function() {
+                document.getElementById('filtro-mes').value = 'todos';
+                document.getElementById('filtro-ano').value = 'todos';
+                document.getElementById('filtro-tipo').value = 'todos';
+                document.getElementById('filtro-status').value = 'todos';
+                atualizarTabela();
+                document.getElementById('filtros-section').style.display = 'none';
+            });
+
+            // Configurar alertas
+            document.getElementById('btn-config-alertas').addEventListener('click', function() {
+                abrirModalConfig();
+            });
+
+            // Testar alerta
+            document.getElementById('btn-testar-alerta').addEventListener('click', function() {
+                mostrarNotificacao("Teste de alerta: Esta é uma notificação de teste!", "info");
+            });
+
+            // Salvar configurações de alerta
+            document.getElementById('btn-salvar-config').addEventListener('click', function() {
+                salvarConfiguracoesAlertas();
+            });
+
+            // Fechar modal de configurações
+            document.querySelector('.close-modal').addEventListener('click', function() {
+                fecharModalConfig();
+            });
+
+            // Fechar modal de perfil
+            document.querySelector('.close-modal-perfil').addEventListener('click', function() {
+                fecharModalPerfil();
+            });
+
+            // Fechar modal ao clicar fora
+            window.addEventListener('click', function(event) {
+                if (event.target === document.getElementById('modal-config')) {
+                    fecharModalConfig();
+                }
+                if (event.target === document.getElementById('modal-perfil')) {
+                    fecharModalPerfil();
+                }
+            });
+
+            // Fechar notificação
+            document.getElementById('btn-fechar-notificacao').addEventListener('click', fecharNotificacao);
+
+            // Definir meta
+            document.getElementById('btn-definir-meta').addEventListener('click', function() {
+                definirMetaEconomia();
+            });
+
+            // Exportar dados
+            document.getElementById('btn-exportar').addEventListener('click', exportarDados);
+
+            // Limpar tudo
+            document.getElementById('btn-limpar-tudo').addEventListener('click', limparTodosDados);
+
+            // Salvar perfil
+            document.getElementById('btn-salvar-perfil').addEventListener('click', salvarPerfil);
+
+            // Redefinir senha por email
+            document.getElementById('btn-redefinir-senha').addEventListener('click', redefinirSenhaPorEmail);
+            
+            // Melhorar rolagem suave em mobile
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+            
+            // Evitar zoom em inputs
+            document.addEventListener('touchstart', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+                    document.body.style.zoom = "100%";
+                }
+            });
+        }
+
+        // FUNÇÕES DE UI PARA MOBILE
+        function mostrarFormulario() {
+            document.getElementById('form-section').style.display = 'block';
+            document.getElementById('filtros-section').style.display = 'none';
+            document.getElementById('descricao').focus();
+            
+            // Rolar para o formulário
+            setTimeout(() => {
+                document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        function toggleFiltros() {
+            const filtrosSection = document.getElementById('filtros-section');
+            const formSection = document.getElementById('form-section');
+            
+            if (filtrosSection.style.display === 'none') {
+                filtrosSection.style.display = 'block';
+                formSection.style.display = 'none';
+                
+                setTimeout(() => {
+                    filtrosSection.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
             } else {
-                details.style.display = 'none';
-                this.innerHTML = '<i class="fas fa-info-circle"></i> Mostrar Detalhes Técnicos';
-            }
-        });
-        
-        // Simulação de busca (apenas para demonstração)
-        document.querySelector('.search-button').addEventListener('click', function() {
-            const searchInput = document.querySelector('.search-input');
-            if (searchInput.value.trim() !== '') {
-                alert(`Você buscou por: "${searchInput.value}".\n\nEm uma implementação real, esta busca seria processada.`);
-                searchInput.value = '';
-            } else {
-                alert('Por favor, digite algo para buscar.');
-            }
-        });
-        
-        // Permitir busca com a tecla Enter
-        document.querySelector('.search-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.querySelector('.search-button').click();
-            }
-        });
-        
-        // Adicionar efeito de digitação ao código de erro (opcional)
-        const errorCode = document.querySelector('.error-code');
-        const originalText = errorCode.textContent;
-        errorCode.textContent = '';
-        
-        let i = 0;
-        function typeWriter() {
-            if (i < originalText.length) {
-                errorCode.textContent += originalText.charAt(i);
-                i++;
-                setTimeout(typeWriter, 150);
+                filtrosSection.style.display = 'none';
             }
         }
-        
-        // Iniciar o efeito de digitação após um pequeno atraso
-        setTimeout(typeWriter, 500);
+
+        function abrirModalConfig() {
+            document.getElementById('modal-config').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function fecharModalConfig() {
+            document.getElementById('modal-config').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function abrirModalPerfil() {
+            if (usuarioAtual) {
+                document.getElementById('perfil-nome').value = usuarioAtual.displayName || '';
+                document.getElementById('perfil-email').value = usuarioAtual.email || '';
+                document.getElementById('modal-perfil').style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function fecharModalPerfil() {
+            document.getElementById('modal-perfil').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            // Limpar campos de senha
+            document.getElementById('perfil-senha-atual').value = '';
+            document.getElementById('perfil-nova-senha').value = '';
+            document.getElementById('perfil-confirmar-senha').value = '';
+        }
+
+        // FUNÇÃO PARA TESTAR CONEXÃO
+        function testarConexaoFirebase() {
+            if (!usuarioAtual || !usuarioAtual.uid) return;
+            
+            const testRef = db.collection('teste').doc('conexao_' + usuarioAtual.uid);
+            
+            testRef.set({
+                teste: new Date().toISOString(),
+                status: 'conexao_ok',
+                usuario: usuarioAtual.uid
+            })
+            .then(() => {
+                console.log("Conexão com Firebase OK para usuário:", usuarioAtual.uid);
+            })
+            .catch(error => {
+                console.error("Erro na conexão Firebase:", error);
+                usandoFirebase = false;
+            });
+        }
+
+        // FUNÇÃO PARA SALVAR PERFIL
+        function salvarPerfil() {
+            const nome = document.getElementById('perfil-nome').value.trim();
+            const senhaAtual = document.getElementById('perfil-senha-atual').value;
+            const novaSenha = document.getElementById('perfil-nova-senha').value;
+
+            if (!nome) {
+                mostrarNotificacao("O nome é obrigatório!", "error");
+                return;
+            }
+
+            mostrarLoading(true);
+
+            const promises = [usuarioAtual.updateProfile({ displayName: nome })];
+
+            if (novaSenha) {
+                if (novaSenha.length < 6) {
+                    mostrarNotificacao("A nova senha deve ter pelo menos 6 caracteres!", "error");
+                    mostrarLoading(false);
+                    return;
+                }
+
+                if (!senhaAtual) {
+                    mostrarNotificacao("Digite a senha atual para alterar a senha!", "error");
+                    mostrarLoading(false);
+                    return;
+                }
+
+                const credential = firebase.auth.EmailAuthProvider.credential(
+                    usuarioAtual.email,
+                    senhaAtual
+                );
+
+                promises.push(
+                    usuarioAtual.reauthenticateWithCredential(credential)
+                        .then(() => usuarioAtual.updatePassword(novaSenha))
+                );
+            }
+
+            Promise.all(promises)
+                .then(() => {
+                    mostrarLoading(false);
+                    fecharModalPerfil();
+                    mostrarNotificacao("Perfil atualizado com sucesso!", "success");
+                    
+                    document.getElementById('user-name').textContent = nome;
+                    
+                    if (usandoFirebase) {
+                        db.collection('usuarios').doc(usuarioAtual.uid).update({
+                            nome: nome
+                        });
+                    }
+                })
+                .catch((error) => {
+                    mostrarLoading(false);
+                    mostrarNotificacao("Erro ao atualizar perfil: " + error.message, "error");
+                });
+        }
+
+        // FUNÇÃO PARA REDEFINIR SENHA POR E-MAIL
+        function redefinirSenhaPorEmail() {
+            if (!usuarioAtual || !usuarioAtual.email) {
+                mostrarNotificacao("Usuário não autenticado!", "error");
+                return;
+            }
+
+            mostrarLoading(true);
+
+            auth.sendPasswordResetEmail(usuarioAtual.email)
+                .then(() => {
+                    mostrarLoading(false);
+                    mostrarNotificacao("E-mail de redefinição enviado! Verifique sua caixa de entrada.", "success");
+                })
+                .catch((error) => {
+                    mostrarLoading(false);
+                    mostrarNotificacao("Erro ao enviar e-mail: " + error.message, "error");
+                });
+        }
+
+        // FUNÇÕES DE AUTENTICAÇÃO
+        function fazerLogin() {
+            const email = document.getElementById('login-email').value;
+            const senha = document.getElementById('login-password').value;
+            
+            mostrarLoading(true);
+            
+            auth.signInWithEmailAndPassword(email, senha)
+                .then((userCredential) => {
+                    mostrarNotificacao("Login realizado com sucesso!", "success");
+                    mostrarLoading(false);
+                })
+                .catch((error) => {
+                    mostrarNotificacao("Erro no login: " + error.message, "error");
+                    mostrarLoading(false);
+                });
+        }
+
+        function criarConta() {
+            const nome = document.getElementById('cadastro-nome').value;
+            const email = document.getElementById('cadastro-email').value;
+            const senha = document.getElementById('cadastro-password').value;
+            const confirmar = document.getElementById('cadastro-confirm').value;
+            
+            if (senha !== confirmar) {
+                mostrarNotificacao("As senhas não coincidem!", "error");
+                return;
+            }
+            
+            if (senha.length < 6) {
+                mostrarNotificacao("A senha deve ter pelo menos 6 caracteres!", "error");
+                return;
+            }
+            
+            mostrarLoading(true);
+            
+            auth.createUserWithEmailAndPassword(email, senha)
+                .then((userCredential) => {
+                    return userCredential.user.updateProfile({
+                        displayName: nome
+                    });
+                })
+                .then(() => {
+                    mostrarNotificacao("Conta criada com sucesso!", "success");
+                    document.getElementById('cadastro-container').style.display = 'none';
+                    document.getElementById('login-container').style.display = 'block';
+                    mostrarLoading(false);
+                })
+                .catch((error) => {
+                    mostrarNotificacao("Erro ao criar conta: " + error.message, "error");
+                    mostrarLoading(false);
+                });
+        }
+
+        // FUNÇÕES DO FIREBASE
+        function carregarDadosFirebase() {
+            mostrarLoading(true);
+            
+            if (!usuarioAtual || !usuarioAtual.uid) {
+                console.log("Nenhum usuário autenticado, usando dados locais");
+                usarDadosLocais();
+                return;
+            }
+            
+            console.log("Carregando dados do Firebase para usuário:", usuarioAtual.uid);
+            
+            db.collection('usuarios').doc(usuarioAtual.uid).collection('transacoes')
+                .orderBy('dataCriacao', 'desc')
+                .get()
+                .then((querySnapshot) => {
+                    transacoes = [];
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        transacoes.push({
+                            id: doc.id,
+                            firebaseId: doc.id,
+                            ...data
+                        });
+                    });
+                    
+                    console.log("Transações carregadas:", transacoes.length);
+                    
+                    return db.collection('usuarios').doc(usuarioAtual.uid).collection('configuracoes').doc('alertas').get();
+                })
+                .then((doc) => {
+                    if (doc.exists) {
+                        configAlertas = doc.data();
+                        console.log("Configurações carregadas:", configAlertas);
+                        atualizarCamposConfigAlertas();
+                    } else {
+                        return db.collection('usuarios').doc(usuarioAtual.uid).collection('configuracoes')
+                            .doc('alertas').set(configAlertas);
+                    }
+                })
+                .then(() => {
+                    return db.collection('usuarios').doc(usuarioAtual.uid).collection('configuracoes').doc('meta').get();
+                })
+                .then((doc) => {
+                    if (doc.exists) {
+                        metaEconomia = doc.data().valor || 0;
+                        document.getElementById('meta-mensal').value = metaEconomia;
+                        console.log("Meta carregada:", metaEconomia);
+                    }
+                    
+                    inicializarApp();
+                    mostrarLoading(false);
+                })
+                .catch((error) => {
+                    console.error("Erro ao carregar dados do Firebase:", error);
+                    mostrarNotificacao("Usando dados locais (modo offline)", "warning");
+                    usarDadosLocais();
+                    mostrarLoading(false);
+                });
+        }
+
+        function salvarTransacaoFirebase(transacao) {
+            if (!usuarioAtual || !usandoFirebase) {
+                console.log("Usando dados locais (Firebase não disponível)");
+                salvarDadosLocais();
+                return Promise.resolve(transacao.id);
+            }
+            
+            if (!usuarioAtual.uid) {
+                console.error("Usuário não tem UID!");
+                return Promise.reject(new Error("Usuário não autenticado"));
+            }
+            
+            const transacaoData = {
+                descricao: transacao.descricao,
+                valor: transacao.valor,
+                tipo: transacao.tipo,
+                categoria: transacao.categoria,
+                data: transacao.data,
+                dataVencimento: transacao.dataVencimento || transacao.data,
+                recorrente: transacao.recorrente || false,
+                status: transacao.status,
+                pago: transacao.status === 'pago',
+                usuarioId: usuarioAtual.uid,
+                dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            console.log("Tentando salvar no Firebase para usuário:", usuarioAtual.uid);
+            
+            if (transacao.firebaseId) {
+                return db.collection('usuarios').doc(usuarioAtual.uid).collection('transacoes')
+                    .doc(transacao.firebaseId)
+                    .update(transacaoData)
+                    .then(() => {
+                        console.log("Atualizado com sucesso:", transacao.firebaseId);
+                        return transacao.firebaseId;
+                    });
+            } else {
+                return db.collection('usuarios').doc(usuarioAtual.uid).collection('transacoes')
+                    .add(transacaoData)
+                    .then((docRef) => {
+                        console.log("Adicionado com sucesso, ID:", docRef.id);
+                        return docRef.id;
+                    });
+            }
+        }
+
+        function excluirTransacaoFirebase(firebaseId) {
+            if (!usuarioAtual || !usandoFirebase) {
+                console.log("Excluindo localmente");
+                salvarDadosLocais();
+                return Promise.resolve();
+            }
+            
+            console.log("Excluindo do Firebase para usuário:", usuarioAtual.uid);
+            
+            return db.collection('usuarios').doc(usuarioAtual.uid).collection('transacoes')
+                .doc(firebaseId)
+                .delete()
+                .then(() => {
+                    console.log("Excluído com sucesso do Firebase");
+                });
+        }
+
+        function salvarConfigAlertasFirebase() {
+            if (!usuarioAtual || !usandoFirebase) {
+                console.log("Salvando configurações localmente");
+                localStorage.setItem('configAlertas', JSON.stringify(configAlertas));
+                return Promise.resolve();
+            }
+            
+            console.log("Salvando configurações no Firebase para usuário:", usuarioAtual.uid);
+            
+            return db.collection('usuarios').doc(usuarioAtual.uid).collection('configuracoes')
+                .doc('alertas')
+                .set(configAlertas)
+                .then(() => {
+                    console.log("Configurações salvas no Firebase");
+                });
+        }
+
+        function salvarMetaFirebase() {
+            if (!usuarioAtual || !usandoFirebase) {
+                console.log("Salvando meta localmente");
+                localStorage.setItem('metaEconomia', metaEconomia);
+                return Promise.resolve();
+            }
+            
+            console.log("Salvando meta no Firebase para usuário:", usuarioAtual.uid);
+            
+            return db.collection('usuarios').doc(usuarioAtual.uid).collection('configuracoes')
+                .doc('meta')
+                .set({ valor: metaEconomia })
+                .then(() => {
+                    console.log("Meta salva no Firebase");
+                });
+        }
+
+        // FUNÇÕES PRINCIPAIS DO APP
+        function inicializarApp() {
+            atualizarDataAtual();
+            carregarAnosEMeses();
+            atualizarResumo();
+            atualizarTabela();
+            atualizarRelatorios();
+            atualizarAlertas();
+            
+            // Atualizar nome do usuário
+            if (usuarioAtual && usuarioAtual.displayName) {
+                document.getElementById('user-name').textContent = usuarioAtual.displayName;
+            } else if (usuarioAtual) {
+                document.getElementById('user-name').textContent = usuarioAtual.email.split('@')[0];
+            }
+            
+            // Iniciar verificador periódico de alertas
+            setInterval(verificarAlertasAutomatico, 60000);
+        }
+
+        function adicionarTransacao() {
+            const descricao = document.getElementById('descricao').value.trim();
+            const valor = parseFloat(document.getElementById('valor').value);
+            
+            if (!descricao || isNaN(valor)) {
+                mostrarNotificacao("Preencha todos os campos corretamente!", "warning");
+                return;
+            }
+            
+            const transacao = {
+                id: Date.now().toString(),
+                descricao: descricao,
+                valor: valor,
+                tipo: document.getElementById('tipo').value,
+                categoria: document.getElementById('categoria').value,
+                data: document.getElementById('data').value,
+                dataVencimento: document.getElementById('data-vencimento').value || document.getElementById('data').value,
+                recorrente: document.getElementById('recorrente').checked,
+                status: document.getElementById('status').value,
+                dataCriacao: new Date().toISOString(),
+                pago: document.getElementById('status').value === 'pago'
+            };
+            
+            console.log("Transação a ser salva:", transacao);
+            
+            mostrarLoading(true);
+            
+            salvarTransacaoFirebase(transacao)
+                .then((firebaseId) => {
+                    console.log("Firebase ID retornado:", firebaseId);
+                    
+                    if (firebaseId) {
+                        transacao.firebaseId = firebaseId;
+                    }
+                    
+                    transacoes.push(transacao);
+                    
+                    // Limpar formulário e ocultar
+                    document.getElementById('form-transacao').reset();
+                    document.getElementById('form-section').style.display = 'none';
+                    
+                    // Configurar datas padrão novamente
+                    const hoje = new Date();
+                    document.getElementById('data').value = hoje.toISOString().split('T')[0];
+                    
+                    const vencimento = new Date();
+                    vencimento.setDate(vencimento.getDate() + 5);
+                    document.getElementById('data-vencimento').value = vencimento.toISOString().split('T')[0];
+                    
+                    // Atualizar interface
+                    carregarAnosEMeses();
+                    atualizarResumo();
+                    atualizarTabela();
+                    atualizarRelatorios();
+                    atualizarAlertas();
+                    
+                    mostrarNotificacao("Transação salva com sucesso!", "success");
+                    mostrarLoading(false);
+                    
+                    if (transacao.tipo === 'despesa' && transacao.status === 'pendente') {
+                        verificarAlertaIndividual(transacao);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Erro completo ao salvar transação:", error);
+                    mostrarNotificacao("Erro ao salvar: " + error.message, "error");
+                    mostrarLoading(false);
+                    
+                    // Fallback para localStorage
+                    console.log("Tentando salvar localmente...");
+                    transacoes.push(transacao);
+                    salvarDadosLocais();
+                    atualizarResumo();
+                    atualizarTabela();
+                    mostrarNotificacao("Salvo localmente (modo offline)", "warning");
+                });
+        }
+
+        function salvarConfiguracoesAlertas() {
+            configAlertas = {
+                diasAntes: parseInt(document.getElementById('dias-alerta').value),
+                horaAlerta: document.getElementById('hora-alerta').value,
+                notificacaoDesktop: document.getElementById('notificacao-desktop').checked,
+                alertaSom: document.getElementById('alerta-som').checked
+            };
+            
+            salvarConfigAlertasFirebase()
+                .then(() => {
+                    fecharModalConfig();
+                    mostrarNotificacao("Configurações salvas!", "success");
+                })
+                .catch((error) => {
+                    mostrarNotificacao("Erro ao salvar configurações: " + error.message, "error");
+                });
+        }
+
+        // FUNÇÕES DE INTERFACE
+        function mostrarLogin() {
+            document.getElementById('login-container').style.display = 'block';
+            document.getElementById('cadastro-container').style.display = 'none';
+            document.getElementById('app-container').style.display = 'none';
+        }
+
+        function mostrarApp() {
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('cadastro-container').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+        }
+
+        function mostrarLoading(mostrar) {
+            document.getElementById('loading').style.display = mostrar ? 'flex' : 'none';
+        }
+
+        function atualizarStatusFirebase(conectado) {
+            const statusEl = document.getElementById('firebase-status');
+            const textEl = document.getElementById('status-text');
+            
+            if (conectado) {
+                statusEl.classList.remove('offline');
+                textEl.textContent = 'Conectado';
+                statusEl.style.display = 'block';
+            } else {
+                statusEl.classList.add('offline');
+                textEl.textContent = 'Offline';
+                statusEl.style.display = 'block';
+            }
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 3000);
+        }
+
+        // FUNÇÕES DE RESUMO E TABELA
+        function atualizarResumo() {
+            let totalReceitas = 0;
+            let totalDespesas = 0;
+            
+            transacoes.forEach(transacao => {
+                if (transacao.tipo === 'receita') {
+                    totalReceitas += transacao.valor;
+                } else if (transacao.status !== 'pago') {
+                    totalDespesas += transacao.valor;
+                }
+            });
+            
+            const saldo = totalReceitas - totalDespesas;
+            
+            document.getElementById('total-receitas').textContent = formatarMoeda(totalReceitas);
+            document.getElementById('total-despesas').textContent = formatarMoeda(totalDespesas);
+            document.getElementById('saldo').textContent = formatarMoeda(saldo);
+            document.getElementById('saldo').className = saldo >= 0 ? 'valor positivo' : 'valor negativo';
+        }
+
+        function atualizarTabela() {
+            const corpoTabela = document.getElementById('corpo-tabela');
+            const filtroMes = document.getElementById('filtro-mes').value;
+            const filtroAno = document.getElementById('filtro-ano').value;
+            const filtroTipo = document.getElementById('filtro-tipo').value;
+            const filtroStatus = document.getElementById('filtro-status').value;
+            
+            // Filtrar transações
+            let transacoesFiltradas = transacoes.filter(transacao => {
+                const data = new Date(transacao.data);
+                const mes = data.getMonth() + 1;
+                const ano = data.getFullYear();
+                
+                if (filtroMes !== 'todos' && parseInt(filtroMes) !== mes) return false;
+                if (filtroAno !== 'todos' && parseInt(filtroAno) !== ano) return false;
+                if (filtroTipo !== 'todos' && transacao.tipo !== filtroTipo) return false;
+                if (filtroStatus !== 'todos' && transacao.status !== filtroStatus) return false;
+                
+                return true;
+            });
+            
+            // Ordenar por data de vencimento
+            transacoesFiltradas.sort((a, b) => new Date(a.dataVencimento) - new Date(b.dataVencimento));
+            
+            // Limpar tabela
+            corpoTabela.innerHTML = '';
+            
+            // Adicionar transações
+            transacoesFiltradas.forEach(transacao => {
+                const row = document.createElement('tr');
+                row.className = transacao.tipo;
+                
+                const dataFormatada = new Date(transacao.data).toLocaleDateString('pt-BR');
+                const valorFormatado = formatarMoeda(transacao.valor);
+                const tipoFormatado = transacao.tipo === 'receita' ? 'Receita' : 'Despesa';
+                const statusColor = transacao.status === 'pago' ? '#28a745' : 
+                                  transacao.status === 'atrasado' ? '#dc3545' : '#ffc107';
+                
+                row.innerHTML = `
+                    <td>${dataFormatada}</td>
+                    <td>${transacao.descricao}</td>
+                    <td style="color:${transacao.tipo === 'receita' ? '#28a745' : '#dc3545'};">
+                        ${valorFormatado}
+                    </td>
+                    <td class="actions-cell">
+                        ${transacao.tipo === 'despesa' && transacao.status !== 'pago' ? 
+                            `<button class="btn-pago" onclick="marcarComoPago('${transacao.id}')" title="Marcar como pago">
+                                <i class="fas fa-check"></i>
+                            </button>` : ''
+                        }
+                        <button class="btn-editar" onclick="editarTransacao('${transacao.id}')" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-excluir" onclick="excluirTransacao('${transacao.id}')" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                corpoTabela.appendChild(row);
+            });
+            
+            document.getElementById('contador-transacoes').textContent = transacoesFiltradas.length;
+        }
+
+        function atualizarAlertas() {
+            const container = document.getElementById('container-alertas');
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            
+            // Filtrar despesas pendentes
+            const despesasPendentes = transacoes.filter(t => 
+                t.tipo === 'despesa' && 
+                t.status === 'pendente' && 
+                t.dataVencimento
+            );
+            
+            let alertasHoje = 0;
+            
+            // Limpar container
+            container.innerHTML = '';
+            
+            if (despesasPendentes.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#666;">Nenhum alerta de pagamento pendente.</p>';
+                document.getElementById('alertas-hoje').textContent = '0';
+                return;
+            }
+            
+            // Verificar cada despesa
+            despesasPendentes.forEach(despesa => {
+                const vencimento = new Date(despesa.dataVencimento);
+                vencimento.setHours(0, 0, 0, 0);
+                
+                const diffTempo = vencimento.getTime() - hoje.getTime();
+                const diffDias = Math.ceil(diffTempo / (1000 * 3600 * 24));
+                
+                if (diffDias === 0) {
+                    alertasHoje++;
+                    adicionarAlertaUI(despesa, 0, 'hoje', container);
+                } else if (diffDias === 1) {
+                    adicionarAlertaUI(despesa, 1, 'amanha', container);
+                } else if (diffDias > 0 && diffDias <= configAlertas.diasAntes) {
+                    adicionarAlertaUI(despesa, diffDias, 'proximo', container);
+                } else if (diffDias < 0) {
+                    adicionarAlertaUI(despesa, diffDias, 'atrasada', container);
+                }
+            });
+            
+            document.getElementById('alertas-hoje').textContent = alertasHoje;
+            
+            if (alertasHoje > 0) {
+                mostrarNotificacao(`⚠️ Você tem ${alertasHoje} conta(s) para pagar HOJE!`, "urgent");
+            }
+        }
+
+        function adicionarAlertaUI(despesa, dias, tipo, container) {
+            const alertaDiv = document.createElement('div');
+            alertaDiv.className = `alerta-item alerta-${tipo}`;
+            
+            let textoDias = '';
+            if (tipo === 'hoje') textoDias = 'HOJE';
+            else if (tipo === 'amanha') textoDias = 'AMANHÃ';
+            else if (tipo === 'atrasada') textoDias = `ATRASADA ${Math.abs(dias)} dia(s)`;
+            else textoDias = `Em ${dias} dia(s)`;
+            
+            const vencimentoFormatado = new Date(despesa.dataVencimento).toLocaleDateString('pt-BR');
+            
+            alertaDiv.innerHTML = `
+                <div>
+                    <span class="alerta-dias">${textoDias}</span>
+                    <strong>${despesa.descricao}</strong> - ${formatarMoeda(despesa.valor)}
+                    <br><small>Vence: ${vencimentoFormatado}</small>
+                </div>
+                <div>
+                    <button class="btn-pago" onclick="marcarComoPago('${despesa.id}')">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(alertaDiv);
+        }
+
+        function atualizarRelatorios() {
+            const hoje = new Date();
+            const mesAtual = hoje.getMonth() + 1;
+            const anoAtual = hoje.getFullYear();
+            
+            // Calcular totais do mês atual
+            let receitasMes = 0;
+            let despesasMes = 0;
+            
+            transacoes.forEach(transacao => {
+                const data = new Date(transacao.data);
+                if (data.getMonth() + 1 === mesAtual && data.getFullYear() === anoAtual) {
+                    if (transacao.tipo === 'receita') {
+                        receitasMes += transacao.valor;
+                    } else if (transacao.status !== 'pago') {
+                        despesasMes += transacao.valor;
+                    }
+                }
+            });
+            
+            const saldoMes = receitasMes - despesasMes;
+            
+            // Atualizar resumo mensal
+            const resumoMensal = document.getElementById('resumo-mensal');
+            resumoMensal.innerHTML = `
+                <p><strong>Receitas:</strong> ${formatarMoeda(receitasMes)}</p>
+                <p><strong>Despesas:</strong> ${formatarMoeda(despesasMes)}</p>
+                <p><strong>Saldo:</strong> <span style="color:${saldoMes >= 0 ? '#28a745' : '#dc3545'}">
+                    ${formatarMoeda(saldoMes)}
+                </span></p>
+            `;
+            
+            // Atualizar próximos vencimentos
+            const proximosVencimentosDiv = document.getElementById('proximos-vencimentos');
+            const despesasProximas = transacoes
+                .filter(t => t.tipo === 'despesa' && t.status === 'pendente' && t.dataVencimento)
+                .sort((a, b) => new Date(a.dataVencimento) - new Date(b.dataVencimento))
+                .slice(0, 5);
+            
+            if (despesasProximas.length === 0) {
+                proximosVencimentosDiv.innerHTML = '<p>Nenhum vencimento próximo</p>';
+            } else {
+                let html = '';
+                despesasProximas.forEach(d => {
+                    const vencimento = new Date(d.dataVencimento);
+                    const diffDias = Math.ceil((vencimento - hoje) / (1000 * 3600 * 24));
+                    const status = diffDias < 0 ? 'Atrasada' : diffDias === 0 ? 'Hoje' : `Em ${diffDias} dias`;
+                    const cor = diffDias < 0 ? '#dc3545' : diffDias === 0 ? '#ffc107' : '#28a745';
+                    
+                    html += `
+                        <div style="margin-bottom: 10px; padding: 8px; background: #f8f9fa; border-radius: 6px;">
+                            <strong>${d.descricao}</strong>
+                            <br>${formatarMoeda(d.valor)} - ${vencimento.toLocaleDateString('pt-BR')}
+                            <span style="color:${cor}; font-weight:bold;"> (${status})</span>
+                        </div>
+                    `;
+                });
+                proximosVencimentosDiv.innerHTML = html;
+            }
+            
+            // Atualizar progresso da meta
+            const progressoMeta = document.getElementById('progresso-meta');
+            if (metaEconomia > 0) {
+                const percentual = Math.min(100, (saldoMes / metaEconomia) * 100);
+                progressoMeta.innerHTML = `
+                    <p><strong>Meta:</strong> ${formatarMoeda(metaEconomia)}</p>
+                    <p><strong>Progresso:</strong> ${percentual.toFixed(1)}%</p>
+                    <div style="background:#e9ecef; height:20px; border-radius:10px; margin:10px 0;">
+                        <div style="background:#28a745; width:${percentual}%; height:100%; border-radius:10px;"></div>
+                    </div>
+                    ${saldoMes >= metaEconomia ? 
+                        '<p style="color:#28a745;"><i class="fas fa-check-circle"></i> Meta atingida!</p>' : 
+                        `<p>Faltam: ${formatarMoeda(metaEconomia - saldoMes)}</p>`
+                    }
+                `;
+            } else {
+                progressoMeta.innerHTML = '<p>Nenhuma meta definida</p>';
+            }
+        }
+
+        // FUNÇÕES COMPARTILHADAS
+        window.marcarComoPago = function(id) {
+            const transacao = transacoes.find(t => t.id === id);
+            if (transacao) {
+                transacao.status = 'pago';
+                transacao.pago = true;
+                
+                mostrarLoading(true);
+                
+                salvarTransacaoFirebase(transacao)
+                    .then(() => {
+                        if (transacao.recorrente) {
+                            const novaData = new Date(transacao.dataVencimento);
+                            novaData.setMonth(novaData.getMonth() + 1);
+                            
+                            const novaTransacao = {
+                                ...transacao,
+                                id: (Date.now() + 1).toString(),
+                                dataVencimento: novaData.toISOString().split('T')[0],
+                                status: 'pendente',
+                                pago: false
+                            };
+                            
+                            return salvarTransacaoFirebase(novaTransacao)
+                                .then((firebaseId) => {
+                                    if (firebaseId) {
+                                        novaTransacao.firebaseId = firebaseId;
+                                    }
+                                    transacoes.push(novaTransacao);
+                                });
+                        }
+                    })
+                    .then(() => {
+                        atualizarTabela();
+                        atualizarResumo();
+                        atualizarRelatorios();
+                        atualizarAlertas();
+                        mostrarNotificacao(`✅ "${transacao.descricao}" marcado como pago!`, "success");
+                        mostrarLoading(false);
+                    })
+                    .catch((error) => {
+                        mostrarNotificacao("Erro ao salvar: " + error.message, "error");
+                        mostrarLoading(false);
+                    });
+            }
+        };
+
+        window.excluirTransacao = function(id) {
+            if (!confirm('Tem certeza que deseja excluir esta transação?')) return;
+            
+            const transacao = transacoes.find(t => t.id === id);
+            if (!transacao) return;
+            
+            mostrarLoading(true);
+            
+            if (transacao.firebaseId) {
+                excluirTransacaoFirebase(transacao.firebaseId)
+                    .then(() => {
+                        transacoes = transacoes.filter(t => t.id !== id);
+                        atualizarTabela();
+                        atualizarResumo();
+                        atualizarRelatorios();
+                        atualizarAlertas();
+                        mostrarNotificacao("Transação excluída!", "success");
+                        mostrarLoading(false);
+                    })
+                    .catch((error) => {
+                        mostrarNotificacao("Erro ao excluir: " + error.message, "error");
+                        mostrarLoading(false);
+                    });
+            } else {
+                transacoes = transacoes.filter(t => t.id !== id);
+                salvarDadosLocais();
+                atualizarTabela();
+                atualizarResumo();
+                atualizarRelatorios();
+                atualizarAlertas();
+                mostrarNotificacao("Transação excluída!", "success");
+                mostrarLoading(false);
+            }
+        };
+
+        window.editarTransacao = function(id) {
+            const transacao = transacoes.find(t => t.id === id);
+            if (!transacao) return;
+            
+            document.getElementById('descricao').value = transacao.descricao;
+            document.getElementById('valor').value = transacao.valor;
+            document.getElementById('tipo').value = transacao.tipo;
+            document.getElementById('categoria').value = transacao.categoria;
+            document.getElementById('data').value = transacao.data;
+            document.getElementById('data-vencimento').value = transacao.dataVencimento;
+            document.getElementById('recorrente').checked = transacao.recorrente || false;
+            document.getElementById('status').value = transacao.status;
+            
+            // Remover transação antiga
+            transacoes = transacoes.filter(t => t.id !== id);
+            
+            mostrarFormulario();
+            mostrarNotificacao('Transação carregada para edição.', 'info');
+        };
+
+        // FUNÇÕES AUXILIARES
+        function usarDadosLocais() {
+            usandoFirebase = false;
+            transacoes = JSON.parse(localStorage.getItem('transacoes')) || [];
+            metaEconomia = parseFloat(localStorage.getItem('metaEconomia')) || 0;
+            const configSalva = localStorage.getItem('configAlertas');
+            if (configSalva) {
+                configAlertas = JSON.parse(configSalva);
+            }
+            atualizarStatusFirebase(false);
+            inicializarApp();
+        }
+
+        function salvarDadosLocais() {
+            localStorage.setItem('transacoes', JSON.stringify(transacoes));
+            localStorage.setItem('metaEconomia', metaEconomia);
+            localStorage.setItem('configAlertas', JSON.stringify(configAlertas));
+        }
+
+        function atualizarDataAtual() {
+            const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
+                          "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const hoje = new Date();
+            const mesAtualEl = document.getElementById('mes-atual');
+            if (mesAtualEl) {
+                mesAtualEl.textContent = `${meses[hoje.getMonth()]}/${hoje.getFullYear()}`;
+            }
+        }
+
+        function carregarAnosEMeses() {
+            const anoSelect = document.getElementById('filtro-ano');
+            const mesSelect = document.getElementById('filtro-mes');
+            
+            if (!anoSelect || !mesSelect) return;
+            
+            anoSelect.innerHTML = '<option value="todos">Todos os anos</option>';
+            mesSelect.innerHTML = '<option value="todos">Todos os meses</option>';
+            
+            const anos = new Set(transacoes.map(t => new Date(t.data).getFullYear()));
+            const anoAtual = new Date().getFullYear();
+            anos.add(anoAtual);
+            
+            Array.from(anos).sort((a, b) => b - a).forEach(ano => {
+                const option = document.createElement('option');
+                option.value = ano;
+                option.textContent = ano;
+                anoSelect.appendChild(option);
+            });
+            
+            const meses = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            
+            meses.forEach((mes, index) => {
+                const option = document.createElement('option');
+                option.value = index + 1;
+                option.textContent = mes;
+                mesSelect.appendChild(option);
+            });
+        }
+
+        function atualizarCamposConfigAlertas() {
+            if (configAlertas) {
+                document.getElementById('hora-alerta').value = configAlertas.horaAlerta || "09:00";
+                document.getElementById('dias-alerta').value = configAlertas.diasAntes || 3;
+                document.getElementById('notificacao-desktop').checked = configAlertas.notificacaoDesktop !== false;
+                document.getElementById('alerta-som').checked = configAlertas.alertaSom !== false;
+            }
+        }
+
+        function verificarAlertasAutomatico() {
+            const agora = new Date();
+            const horaAtual = agora.getHours() + ':' + (agora.getMinutes() < 10 ? '0' : '') + agora.getMinutes();
+            
+            if (horaAtual === configAlertas.horaAlerta) {
+                atualizarAlertas();
+                
+                const ultimoAlerta = localStorage.getItem('ultimoAlertaDia');
+                const hoje = new Date().toDateString();
+                
+                if (ultimoAlerta !== hoje) {
+                    localStorage.setItem('ultimoAlertaDia', hoje);
+                }
+            }
+        }
+
+        function verificarAlertaIndividual(transacao) {
+            const hoje = new Date();
+            const vencimento = new Date(transacao.dataVencimento);
+            const diffDias = Math.ceil((vencimento - hoje) / (1000 * 3600 * 24));
+            
+            if (diffDias <= configAlertas.diasAntes && diffDias >= 0) {
+                mostrarNotificacao(`⏰ "${transacao.descricao}" vence em ${diffDias} dia(s)!`, "info");
+            }
+        }
+
+        function mostrarNotificacao(mensagem, tipo) {
+            const notificacao = document.getElementById('notificacao-alerta');
+            const texto = document.getElementById('texto-notificacao');
+            
+            texto.textContent = mensagem;
+            
+            if (tipo === 'urgent') {
+                notificacao.style.background = '#ff4444';
+            } else if (tipo === 'success') {
+                notificacao.style.background = '#28a745';
+            } else if (tipo === 'warning') {
+                notificacao.style.background = '#ffc107';
+                notificacao.style.color = '#212529';
+            } else if (tipo === 'error') {
+                notificacao.style.background = '#dc3545';
+            } else {
+                notificacao.style.background = '#17a2b8';
+            }
+            
+            notificacao.style.display = 'flex';
+            
+            setTimeout(() => {
+                if (notificacao.style.display === 'flex') {
+                    notificacao.style.display = 'none';
+                }
+            }, 5000);
+        }
+
+        function fecharNotificacao() {
+            document.getElementById('notificacao-alerta').style.display = 'none';
+        }
+
+        function definirMetaEconomia() {
+            const meta = parseFloat(document.getElementById('meta-mensal').value) || 0;
+            metaEconomia = meta;
+            
+            salvarMetaFirebase()
+                .then(() => {
+                    atualizarRelatorios();
+                    mostrarNotificacao("Meta definida com sucesso!", "success");
+                })
+                .catch((error) => {
+                    mostrarNotificacao("Erro ao salvar meta: " + error.message, "error");
+                });
+        }
+
+        function exportarDados() {
+            const dados = JSON.stringify(transacoes, null, 2);
+            const blob = new Blob([dados], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'controle-financeiro-' + new Date().toISOString().split('T')[0] + '.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            mostrarNotificacao("Dados exportados com sucesso!", "success");
+        }
+
+        function limparTodosDados() {
+            if (!confirm('⚠️ ATENÇÃO! Tem certeza que deseja apagar TODOS os dados? Esta ação não pode ser desfeita!')) return;
+            
+            mostrarLoading(true);
+            
+            if (usandoFirebase && usuarioAtual) {
+                db.collection('usuarios').doc(usuarioAtual.uid).collection('transacoes').get()
+                    .then((querySnapshot) => {
+                        const batch = db.batch();
+                        querySnapshot.forEach((doc) => {
+                            batch.delete(doc.ref);
+                        });
+                        return batch.commit();
+                    })
+                    .then(() => {
+                        transacoes = [];
+                        metaEconomia = 0;
+                        atualizarTabela();
+                        atualizarResumo();
+                        atualizarRelatorios();
+                        atualizarAlertas();
+                        mostrarNotificacao("Todos os dados foram apagados!", "warning");
+                        mostrarLoading(false);
+                    })
+                    .catch((error) => {
+                        mostrarNotificacao("Erro ao apagar dados: " + error.message, "error");
+                        mostrarLoading(false);
+                    });
+            } else {
+                transacoes = [];
+                metaEconomia = 0;
+                localStorage.removeItem('transacoes');
+                localStorage.removeItem('metaEconomia');
+                atualizarTabela();
+                atualizarResumo();
+                atualizarRelatorios();
+                atualizarAlertas();
+                mostrarNotificacao("Todos os dados foram apagados!", "warning");
+                mostrarLoading(false);
+            }
+        }
+
+        function formatarMoeda(valor) {
+            return 'R$ ' + valor.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function formatarCategoria(categoria) {
+            const categorias = {
+                'alimentacao': 'Alimentação',
+                'moradia': 'Moradia',
+                'transporte': 'Transporte',
+                'lazer': 'Lazer',
+                'saude': 'Saúde',
+                'educacao': 'Educação',
+                'contas': 'Contas Fixas',
+                'outros': 'Outros'
+            };
+            return categorias[categoria] || categoria;
+        }
     </script>
 </body>
 </html>
-
